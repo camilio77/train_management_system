@@ -22,7 +22,7 @@ This is the repository for the data structure class 11307 project with the name 
 
 In the following diagram is defined the organization of the project and classes that solve the problem.
 
-![DiagramaDeClases](C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\DiagramaDeClases.jpg)
+![DiagramaDeClases](./supportMaterial/DiagramaDeClases.jpg)
 
 ### **Database**
 
