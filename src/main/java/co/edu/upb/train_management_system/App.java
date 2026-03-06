@@ -8,16 +8,18 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-/**
- * JavaFX App
- */
 public class App extends Application {
 
     private static Scene scene;
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("primary"), 640, 480);
+        Parent root = FXMLLoader.load(App.class.getResource("login.fxml"));
+        Scene scene = new Scene(root);
+
+        String css = this.getClass().getResource("login.css").toExternalForm();
+        scene.getStylesheets().add(css);
+        stage.setTitle("Sistema de gestion de trenes");
         stage.setScene(scene);
         stage.show();
     }
