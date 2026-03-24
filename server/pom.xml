@@ -27,6 +27,13 @@
             <version>42.7.10</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>co.edu.upb</groupId>
+            <artifactId>array</artifactId>
+            <version>0.0.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/array.jar</systemPath>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

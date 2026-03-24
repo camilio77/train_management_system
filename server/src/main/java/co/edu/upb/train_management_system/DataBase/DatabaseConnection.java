@@ -1,9 +1,13 @@
-package co.edu.upb.train_management_system.model.DataBase;
+package co.edu.upb.train_management_system.DataBase;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+import co.edu.upb.train_management_system.enviroment.Environment;
 
 public class DatabaseConnection {
-    private static final String URI = "jdbc:postgresql://postgres:trenes170010@db.uvhddzisapmrfmkdlajn.supabase.co:5432/postgres";
+    private static final String URI = Environment.getInstance().getDatabase();
 
     private static Connection connection = null;
 
