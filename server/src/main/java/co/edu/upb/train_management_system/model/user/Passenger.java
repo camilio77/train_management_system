@@ -1,19 +1,22 @@
 package co.edu.upb.train_management_system.model.user;
 
-import co.edu.upb.app.LinkedList.singly.LinkedList;
-import co.edu.upb.train_management_system.model.ticket.Ticket;
-
 import java.io.Serializable;
 
+import co.edu.upb.app.LinkedList.doubly.LinkedList;
+import co.edu.upb.train_management_system.model.ticket.Ticket;
+
 public class Passenger extends AbstractUser implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private String password;
     private String address;
     private LinkedList<Ticket> previousTickets;
     private Ticket currentTicket;
     private LinkedList<EmergencyContact> emergencyContacts;
 
-    public Passenger(int identificacion, String names, String lastNames, String identificationType, String address) {
+    public Passenger(int identificacion, String names, String lastNames, String identificationType, String address, String password) {
         super(identificacion, names, lastNames, identificationType);
         this.address = address;
+        this.password = password;
         this.previousTickets = new LinkedList<>();
         this.currentTicket = null;
         this.emergencyContacts = new LinkedList<>();
