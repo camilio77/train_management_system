@@ -13,7 +13,7 @@ public class Passenger extends AbstractUser implements Serializable {
     private Ticket currentTicket;
     private LinkedList<EmergencyContact> emergencyContacts;
 
-    public Passenger(int identificacion, String names, String lastNames, String identificationType, String address, String password) {
+    public Passenger(String identificacion, String names, String lastNames, String identificationType, String address, String password) {
         super(identificacion, names, lastNames, identificationType);
         this.address = address;
         this.password = password;
@@ -52,7 +52,7 @@ public class Passenger extends AbstractUser implements Serializable {
         return emergencyContacts.add(emergencyContact);
     }
 
-    public boolean deleteEmergencyContact(int idContact){
+    public boolean deleteEmergencyContact(String idContact){
         emergencyContacts.forEach(e -> {
             if (e.getIdentificacion() == idContact){
                 emergencyContacts.remove(e);
@@ -62,7 +62,7 @@ public class Passenger extends AbstractUser implements Serializable {
         return true;
     }
 
-    public boolean modifyEmergencyContact(int idContact, EmergencyContact newContact){
+    public boolean modifyEmergencyContact(String idContact, EmergencyContact newContact){
         emergencyContacts.forEach(e -> {
             if (e.getIdentificacion() == idContact){
                 emergencyContacts.replace(e, newContact, t -> t.getIdentificacion() == idContact);

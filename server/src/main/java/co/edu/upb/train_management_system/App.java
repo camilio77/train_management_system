@@ -5,6 +5,7 @@ import co.edu.upb.train_management_system.factory.ServerFactory;
 
 public class App {
     public static void main(String[] args) {
+        System.setProperty("java.net.preferIPv4Stack", "true");
         try {
             ServerController server = ServerFactory.create();
             server.init();

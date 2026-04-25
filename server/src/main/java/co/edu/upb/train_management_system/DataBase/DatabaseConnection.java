@@ -15,7 +15,9 @@ public class DatabaseConnection {
 
     public static Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
-            connection = DriverManager.getConnection(URI);
+            String uri = Environment.getInstance().getDatabase();
+            System.out.println("Connecting to: " + uri);
+            connection = DriverManager.getConnection(uri);
         }
         return connection;
     }
