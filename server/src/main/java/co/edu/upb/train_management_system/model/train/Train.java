@@ -76,4 +76,8 @@ public class Train implements Serializable {
         return stack;
     }
 
+    public String getType(){
+        return type;
+    }
+
 }

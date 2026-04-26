@@ -11,6 +11,7 @@ public class Route {
     private Date dateOfLeaving;
     private Date dateOfArrival;
     private Queue<Train> trains;
+    private int idTren;
     private Station origin;
     private Station destination;
 
@@ -83,5 +84,9 @@ public class Route {
         });
         return trainArray;
     }
+
+    public int getIdTren() { return idTren; }
+
+    public void setIdTren(int idTren) { this.idTren = idTren; }
      
 }

@@ -1,6 +1,9 @@
 package co.edu.upb.train_management_system.model.user;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 import co.edu.upb.train_management_system.DataBase.DatabaseConnection;
 
 public class UserService {
@@ -14,7 +17,6 @@ public class UserService {
         return instance;
     }
 
-    // Login: busca en tabla usuario por identificacion y contrasena
     public AbstractUserWithPower login(String identificacion, String contrasena) throws Exception {
         Connection conn = DatabaseConnection.getConnection();
         String sql = "SELECT * FROM usuario WHERE identificacion = ? AND contrasena = ? AND tipo = 'ADMINISTRADOR'";
@@ -35,7 +37,6 @@ public class UserService {
         return null;
     }
 
-    // Registrar pasajero en tabla usuario
     public boolean registerPassenger(Passenger passenger) throws Exception {
         Connection conn = DatabaseConnection.getConnection();
         String sql = "INSERT INTO usuario (identificacion, nombres, apellidos, contrasena, tipo, tipo_identificacion, direccion) VALUES (?, ?, ?, ?, 'PASAJERO', ?, ?)";

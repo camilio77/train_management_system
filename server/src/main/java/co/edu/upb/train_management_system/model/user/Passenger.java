@@ -7,7 +7,6 @@ import co.edu.upb.train_management_system.model.ticket.Ticket;
 
 public class Passenger extends AbstractUser implements Serializable {
     private static final long serialVersionUID = 1L;
-    private String password;
     private String address;
     private LinkedList<Ticket> previousTickets;
     private Ticket currentTicket;
@@ -16,7 +15,7 @@ public class Passenger extends AbstractUser implements Serializable {
     public Passenger(String identificacion, String names, String lastNames, String identificationType, String address, String password) {
         super(identificacion, names, lastNames, identificationType);
         this.address = address;
-        this.password = password;
+        setPassword(password);
         this.previousTickets = new LinkedList<>();
         this.currentTicket = null;
         this.emergencyContacts = new LinkedList<>();

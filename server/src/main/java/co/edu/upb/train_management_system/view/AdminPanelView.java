@@ -1,52 +1,512 @@
 package co.edu.upb.train_management_system.view;
 
+import co.edu.upb.train_management_system.DataBase.DatabaseConnection;
+import co.edu.upb.train_management_system.model.route.Route;
+import co.edu.upb.train_management_system.model.route.RouteService;
+import co.edu.upb.train_management_system.model.station.Station;
+import co.edu.upb.train_management_system.model.station.StationService;
+import co.edu.upb.train_management_system.model.train.Train;
+import co.edu.upb.train_management_system.model.train.TrainService;
 import co.edu.upb.train_management_system.model.user.AbstractUserWithPower;
+import co.edu.upb.train_management_system.model.wagon.Wagon;
+import co.edu.upb.train_management_system.model.wagon.WagonService;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.Timestamp;
+import java.util.List;
 
 public class AdminPanelView {
     private JFrame frame;
 
+    // Colores consistentes con LoginView
+    private static final Color DARK_BLUE = new Color(30, 58, 95);
+    private static final Color BG = new Color(245, 247, 250);
+
     public AdminPanelView(AbstractUserWithPower admin) {
-        frame = new JFrame("Panel Administrador");
-        frame.setSize(500, 350);
+        frame = new JFrame("Panel Administrador — " + admin.getFullName());
+        frame.setSize(1100, 680);
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         frame.setLocationRelativeTo(null);
-        frame.setLayout(new BorderLayout(10, 10));
+        frame.setLayout(new BorderLayout());
 
-        // Header con nombre del admin
-        JLabel header = new JLabel(
-                "Bienvenido, " + admin.getFullName(),
-                SwingConstants.CENTER
-        );
-        header.setFont(new Font("Arial", Font.BOLD, 16));
-        header.setBorder(BorderFactory.createEmptyBorder(15, 0, 5, 0));
+        // Header
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(DARK_BLUE);
+        header.setBorder(new EmptyBorder(14, 24, 14, 24));
 
-        // Panel de opciones (puedes agregar más botones aquí después)
-        JPanel options = new JPanel(new GridLayout(2, 2, 10, 10));
-        options.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        JLabel title = new JLabel("🚆 Train Management — Panel Admin");
+        title.setFont(new Font("Arial", Font.BOLD, 18));
+        title.setForeground(Color.WHITE);
 
-        JButton btnVerUsuarios = new JButton("Ver Pasajeros");
-        JButton btnCerrarSesion = new JButton("Cerrar Sesión");
+        JLabel adminName = new JLabel("👤 " + admin.getFullName());
+        adminName.setFont(new Font("Arial", Font.PLAIN, 13));
+        adminName.setForeground(new Color(180, 200, 220));
 
-        options.add(btnVerUsuarios);
-        options.add(new JLabel()); // spacer
-        options.add(new JLabel()); // spacer
-        options.add(btnCerrarSesion);
-
-        btnCerrarSesion.addActionListener(e -> {
+        JButton btnLogout = new JButton("Cerrar Sesión");
+        btnLogout.setBackground(new Color(220, 60, 60));
+        btnLogout.setForeground(Color.WHITE);
+        btnLogout.setFocusPainted(false);
+        btnLogout.setBorderPainted(false);
+        btnLogout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnLogout.addActionListener(e -> {
             frame.dispose();
             new LoginView();
         });
 
-        btnVerUsuarios.addActionListener(e -> {
-            JOptionPane.showMessageDialog(frame, "Próximamente: lista de pasajeros.");
-        });
+        JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
+        headerRight.setOpaque(false);
+        headerRight.add(adminName);
+        headerRight.add(btnLogout);
+
+        header.add(title, BorderLayout.WEST);
+        header.add(headerRight, BorderLayout.EAST);
+
+        // Tabs
+        JTabbedPane tabs = new JTabbedPane();
+        tabs.setFont(new Font("Arial", Font.BOLD, 13));
+        tabs.setBackground(BG);
+        tabs.addTab("🚂 Trenes", buildTrainTab());
+        tabs.addTab("🏛 Estaciones", buildStationTab());
+        tabs.addTab("🛤 Rutas", buildRouteTab());
+        tabs.addTab("🚃 Vagones", buildWagonTab());
 
         frame.add(header, BorderLayout.NORTH);
-        frame.add(options, BorderLayout.CENTER);
+        frame.add(tabs, BorderLayout.CENTER);
         frame.setVisible(true);
+    }
+
+    // ─── TAB TRENES ───────────────────────────────────────────────
+    private JPanel buildTrainTab() {
+        String[] cols = {"ID", "Nombre", "Tipo", "Kilometraje"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
+        };
+        JTable table = styledTable(model);
+        loadTrains(model);
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        buttons.setBackground(BG);
+
+        JButton btnAdd = actionButton("+ Agregar", new Color(34, 139, 80));
+        JButton btnEdit = actionButton("✏ Editar", new Color(30, 58, 95));
+        JButton btnDelete = actionButton("🗑 Eliminar", new Color(200, 50, 50));
+        JButton btnRefresh = actionButton("↻ Actualizar", new Color(100, 110, 125));
+
+        buttons.add(btnAdd);
+        buttons.add(btnEdit);
+        buttons.add(btnDelete);
+        buttons.add(btnRefresh);
+
+        btnRefresh.addActionListener(e -> loadTrains(model));
+
+        btnAdd.addActionListener(e -> {
+            JTextField nombre = new JTextField();
+            JComboBox<String> tipo = new JComboBox<>(new String[]{"MERCEDES", "ARNOLD"});
+            Object[] fields = {"Nombre:", nombre, "Tipo:", tipo};
+            int r = JOptionPane.showConfirmDialog(frame, fields, "Agregar Tren", JOptionPane.OK_CANCEL_OPTION);
+            if (r == JOptionPane.OK_OPTION && !nombre.getText().trim().isEmpty()) {
+                try {
+                    TrainService.getInstance().create(nombre.getText().trim(), (String) tipo.getSelectedItem());
+                    loadTrains(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
+            }
+        });
+
+        btnEdit.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Selecciona un tren.");
+                return;
+            }
+            int id = Integer.parseInt(model.getValueAt(row, 0).toString());
+            JTextField nombre = new JTextField(model.getValueAt(row, 1).toString());
+            JComboBox<String> tipo = new JComboBox<>(new String[]{"MERCEDES", "ARNOLD"});
+            tipo.setSelectedItem(model.getValueAt(row, 2).toString());
+            JTextField km = new JTextField(model.getValueAt(row, 3).toString());
+            Object[] fields = {"Nombre:", nombre, "Tipo:", tipo, "Kilometraje:", km};
+            int r = JOptionPane.showConfirmDialog(frame, fields, "Editar Tren", JOptionPane.OK_CANCEL_OPTION);
+            if (r == JOptionPane.OK_OPTION) {
+                try {
+                    TrainService.getInstance().update(id, nombre.getText().trim(),
+                            (String) tipo.getSelectedItem(), Integer.parseInt(km.getText().trim()));
+                    loadTrains(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
+            }
+        });
+
+        btnDelete.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Selecciona un tren.");
+                return;
+            }
+            int id = Integer.parseInt(model.getValueAt(row, 0).toString());
+            int confirm = JOptionPane.showConfirmDialog(frame, "¿Eliminar tren " + id + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    TrainService.getInstance().delete(id);
+                    loadTrains(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
+            }
+        });
+
+        return buildTabPanel(table, buttons);
+    }
+
+    private void loadTrains(DefaultTableModel model) {
+        model.setRowCount(0);
+        try {
+            for (Train t : TrainService.getInstance().getAll())
+                model.addRow(new Object[]{t.getId(), t.getName(), t.getType(), t.getMileage()});
+        } catch (Exception ex) {
+            showError(ex);
+        }
+    }
+
+    // ─── TAB ESTACIONES ───────────────────────────────────────────
+    private JPanel buildStationTab() {
+        String[] cols = {"ID", "Nombre"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
+        };
+        JTable table = styledTable(model);
+        loadStations(model);
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        buttons.setBackground(BG);
+
+        JButton btnAdd = actionButton("+ Agregar", new Color(34, 139, 80));
+        JButton btnEdit = actionButton("✏ Editar", new Color(30, 58, 95));
+        JButton btnDelete = actionButton("🗑 Eliminar", new Color(200, 50, 50));
+        JButton btnRefresh = actionButton("↻ Actualizar", new Color(100, 110, 125));
+
+        buttons.add(btnAdd);
+        buttons.add(btnEdit);
+        buttons.add(btnDelete);
+        buttons.add(btnRefresh);
+
+        btnRefresh.addActionListener(e -> loadStations(model));
+
+        btnAdd.addActionListener(e -> {
+            JTextField nombre = new JTextField();
+            Object[] fields = {"Nombre:", nombre};
+            int r = JOptionPane.showConfirmDialog(frame, fields, "Agregar Estación", JOptionPane.OK_CANCEL_OPTION);
+            if (r == JOptionPane.OK_OPTION && !nombre.getText().trim().isEmpty()) {
+                try {
+                    StationService.getInstance().create(nombre.getText().trim());
+                    loadStations(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
+            }
+        });
+
+        btnEdit.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Selecciona una estación.");
+                return;
+            }
+            int id = Integer.parseInt(model.getValueAt(row, 0).toString());
+            JTextField nombre = new JTextField(model.getValueAt(row, 1).toString());
+            Object[] fields = {"Nombre:", nombre};
+            int r = JOptionPane.showConfirmDialog(frame, fields, "Editar Estación", JOptionPane.OK_CANCEL_OPTION);
+            if (r == JOptionPane.OK_OPTION) {
+                try {
+                    StationService.getInstance().update(id, nombre.getText().trim());
+                    loadStations(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
+            }
+        });
+
+        btnDelete.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Selecciona una estación.");
+                return;
+            }
+            int id = Integer.parseInt(model.getValueAt(row, 0).toString());
+            int confirm = JOptionPane.showConfirmDialog(frame, "¿Eliminar estación " + id + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    StationService.getInstance().delete(id);
+                    loadStations(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
+            }
+        });
+
+        return buildTabPanel(table, buttons);
+    }
+
+    private void loadStations(DefaultTableModel model) {
+        model.setRowCount(0);
+        try {
+            for (Station s : StationService.getInstance().getAll())
+                model.addRow(new Object[]{s.getId(), s.getName()});
+        } catch (Exception ex) {
+            showError(ex);
+        }
+    }
+
+    // ─── TAB RUTAS ────────────────────────────────────────────────
+    private JPanel buildRouteTab() {
+        String[] cols = {"ID", "ID Tren", "Fecha Salida", "Fecha Llegada"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
+        };
+        JTable table = styledTable(model);
+        loadRoutes(model);
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        buttons.setBackground(BG);
+
+        JButton btnAdd = actionButton("+ Agregar", new Color(34, 139, 80));
+        JButton btnEdit = actionButton("✏ Editar", new Color(30, 58, 95));
+        JButton btnDelete = actionButton("🗑 Eliminar", new Color(200, 50, 50));
+        JButton btnRefresh = actionButton("↻ Actualizar", new Color(100, 110, 125));
+
+        buttons.add(btnAdd);
+        buttons.add(btnEdit);
+        buttons.add(btnDelete);
+        buttons.add(btnRefresh);
+
+        btnRefresh.addActionListener(e -> loadRoutes(model));
+
+        btnAdd.addActionListener(e -> {
+            JTextField idTren = new JTextField();
+            JTextField salida = new JTextField("2025-06-01 08:00:00");
+            JTextField llegada = new JTextField("2025-06-01 12:00:00");
+            Object[] fields = {"ID Tren:", idTren, "Fecha Salida (yyyy-MM-dd HH:mm:ss):", salida, "Fecha Llegada:", llegada};
+            int r = JOptionPane.showConfirmDialog(frame, fields, "Agregar Ruta", JOptionPane.OK_CANCEL_OPTION);
+            if (r == JOptionPane.OK_OPTION) {
+                try {
+                    RouteService.getInstance().create(
+                            Integer.parseInt(idTren.getText().trim()),
+                            Timestamp.valueOf(salida.getText().trim()),
+                            Timestamp.valueOf(llegada.getText().trim())
+                    );
+                    loadRoutes(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
+            }
+        });
+
+        btnEdit.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Selecciona una ruta.");
+                return;
+            }
+            int id = Integer.parseInt(model.getValueAt(row, 0).toString());
+            JTextField salida = new JTextField(model.getValueAt(row, 2).toString());
+            JTextField llegada = new JTextField(model.getValueAt(row, 3).toString());
+            Object[] fields = {"Fecha Salida:", salida, "Fecha Llegada:", llegada};
+            int r = JOptionPane.showConfirmDialog(frame, fields, "Editar Ruta", JOptionPane.OK_CANCEL_OPTION);
+            if (r == JOptionPane.OK_OPTION) {
+                try {
+                    RouteService.getInstance().update(id,
+                            Timestamp.valueOf(salida.getText().trim()),
+                            Timestamp.valueOf(llegada.getText().trim())
+                    );
+                    loadRoutes(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
+            }
+        });
+
+        btnDelete.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Selecciona una ruta.");
+                return;
+            }
+            int id = Integer.parseInt(model.getValueAt(row, 0).toString());
+            int confirm = JOptionPane.showConfirmDialog(frame, "¿Eliminar ruta " + id + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    RouteService.getInstance().delete(id);
+                    loadRoutes(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
+            }
+        });
+
+        return buildTabPanel(table, buttons);
+    }
+
+    private void loadRoutes(DefaultTableModel model) {
+        model.setRowCount(0);
+        try {
+            for (Route r : RouteService.getInstance().getAll())
+                model.addRow(new Object[]{r.getId(), "—", r.getDateOfLeaving(), r.getDateOfArrival()});
+        } catch (Exception ex) {
+            showError(ex);
+        }
+    }
+
+    // ─── TAB VAGONES ──────────────────────────────────────────────
+    private JPanel buildWagonTab() {
+        String[] cols = {"ID", "ID Tren", "Tipo", "Capacidad"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
+        };
+        JTable table = styledTable(model);
+        loadWagons(model);
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        buttons.setBackground(BG);
+
+        JButton btnAdd = actionButton("+ Agregar", new Color(34, 139, 80));
+        JButton btnEdit = actionButton("✏ Editar", new Color(30, 58, 95));
+        JButton btnDelete = actionButton("🗑 Eliminar", new Color(200, 50, 50));
+        JButton btnRefresh = actionButton("↻ Actualizar", new Color(100, 110, 125));
+
+        buttons.add(btnAdd);
+        buttons.add(btnEdit);
+        buttons.add(btnDelete);
+        buttons.add(btnRefresh);
+
+        btnRefresh.addActionListener(e -> loadWagons(model));
+
+        btnAdd.addActionListener(e -> {
+            JTextField idTren = new JTextField();
+            JComboBox<String> tipo = new JComboBox<>(new String[]{"PASAJEROS", "EQUIPAJE"});
+            JTextField capacidad = new JTextField("50");
+            Object[] fields = {"ID Tren:", idTren, "Tipo:", tipo, "Capacidad:", capacidad};
+            int r = JOptionPane.showConfirmDialog(frame, fields, "Agregar Vagón", JOptionPane.OK_CANCEL_OPTION);
+            if (r == JOptionPane.OK_OPTION) {
+                try {
+                    WagonService.getInstance().create(
+                            Integer.parseInt(idTren.getText().trim()),
+                            (String) tipo.getSelectedItem(),
+                            Integer.parseInt(capacidad.getText().trim())
+                    );
+                    loadWagons(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
+            }
+        });
+
+        btnEdit.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Selecciona un vagón.");
+                return;
+            }
+            int id = Integer.parseInt(model.getValueAt(row, 0).toString());
+            JComboBox<String> tipo = new JComboBox<>(new String[]{"PASAJEROS", "EQUIPAJE"});
+            tipo.setSelectedItem(model.getValueAt(row, 2).toString());
+            JTextField capacidad = new JTextField(model.getValueAt(row, 3).toString());
+            Object[] fields = {"Tipo:", tipo, "Capacidad:", capacidad};
+            int r = JOptionPane.showConfirmDialog(frame, fields, "Editar Vagón", JOptionPane.OK_CANCEL_OPTION);
+            if (r == JOptionPane.OK_OPTION) {
+                try {
+                    WagonService.getInstance().update(id,
+                            (String) tipo.getSelectedItem(),
+                            Integer.parseInt(capacidad.getText().trim())
+                    );
+                    loadWagons(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
+            }
+        });
+
+        btnDelete.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Selecciona un vagón.");
+                return;
+            }
+            int id = Integer.parseInt(model.getValueAt(row, 0).toString());
+            int confirm = JOptionPane.showConfirmDialog(frame, "¿Eliminar vagón " + id + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    WagonService.getInstance().delete(id);
+                    loadWagons(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
+            }
+        });
+
+        return buildTabPanel(table, buttons);
+    }
+
+    private void loadWagons(DefaultTableModel model) {
+        model.setRowCount(0);
+        try {
+            String sql = "SELECT v.id_vagon, v.id_tren, v.tipo, v.capacidad FROM vagon v";
+            var rs = DatabaseConnection.getConnection().createStatement().executeQuery(sql);
+            while (rs.next())
+                model.addRow(new Object[]{rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getInt(4)});
+        } catch (Exception ex) {
+            showError(ex);
+        }
+    }
+
+    // ─── HELPERS ──────────────────────────────────────────────────
+    private JPanel buildTabPanel(JTable table, JPanel buttons) {
+        JPanel panel = new JPanel(new BorderLayout(0, 0));
+        panel.setBackground(BG);
+        panel.setBorder(new EmptyBorder(12, 16, 12, 16));
+        panel.add(buttons, BorderLayout.NORTH);
+        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JTable styledTable(DefaultTableModel model) {
+        JTable table = new JTable(model);
+        table.setRowHeight(30);
+        table.setFont(new Font("Arial", Font.PLAIN, 13));
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
+        table.getTableHeader().setBackground(DARK_BLUE);
+        table.getTableHeader().setForeground(Color.WHITE);
+        table.setSelectionBackground(new Color(200, 215, 235));
+        table.setGridColor(new Color(220, 225, 230));
+        table.setShowGrid(true);
+        return table;
+    }
+
+    private JButton actionButton(String text, Color color) {
+        JButton btn = new JButton(text);
+        btn.setBackground(color);
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setFont(new Font("Arial", Font.BOLD, 12));
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setBorder(new EmptyBorder(8, 16, 8, 16));
+        return btn;
+    }
+
+    private void showError(Exception ex) {
+        JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     {
