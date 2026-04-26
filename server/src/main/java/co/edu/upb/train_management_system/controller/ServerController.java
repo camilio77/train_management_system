@@ -31,7 +31,7 @@ public class ServerController {
                 DatabaseConnection.getConnection();
                 view.startStatus("Server Running");
                 view.setMessage("Database connected successfully.");
-                view.showTestButton(); // ← aparece el botón prueba
+                view.showTestButton();
             } catch (SQLException e) {
                 System.err.println("SQLState: " + e.getSQLState());
                 view.setMessage("DB Error: " + e.getMessage());

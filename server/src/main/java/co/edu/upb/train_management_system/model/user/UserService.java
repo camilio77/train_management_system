@@ -19,19 +19,31 @@ public class UserService {
 
     public AbstractUserWithPower login(String identificacion, String contrasena) throws Exception {
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "SELECT * FROM usuario WHERE identificacion = ? AND contrasena = ? AND tipo = 'ADMINISTRADOR'";
+        String sql = "SELECT * FROM usuario WHERE identificacion = ? AND contrasena = ? AND tipo IN ('ADMINISTRADOR', 'EMPLEADO')";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, identificacion);
         stmt.setString(2, contrasena);
         ResultSet rs = stmt.executeQuery();
+
         if (rs.next()) {
-            return new Admin(
-                rs.getString("identificacion"),
-                rs.getString("nombres"),
-                rs.getString("apellidos"),
-                rs.getString("tipo_identificacion"),
-                rs.getString("contrasena")
-            );
+            String tipo = rs.getString("tipo");
+            if (tipo.equals("ADMINISTRADOR")) {
+                return new Admin(
+                    rs.getString("identificacion"),
+                    rs.getString("nombres"),
+                    rs.getString("apellidos"),
+                    rs.getString("tipo_identificacion"),
+                    rs.getString("contrasena")
+                );
+            } else {
+                return new Employee(
+                    rs.getString("identificacion"),
+                    rs.getString("nombres"),
+                    rs.getString("apellidos"),
+                    rs.getString("tipo_identificacion"),
+                    rs.getString("contrasena")
+                );
+            }
         }
         return null;
     }

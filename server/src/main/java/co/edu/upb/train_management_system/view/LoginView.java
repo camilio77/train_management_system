@@ -1,6 +1,7 @@
 package co.edu.upb.train_management_system.view;
 
 import co.edu.upb.train_management_system.model.user.AbstractUserWithPower;
+import co.edu.upb.train_management_system.model.user.Admin;
 import co.edu.upb.train_management_system.model.user.UserService;
 
 import javax.swing.*;
@@ -192,7 +193,11 @@ public class LoginView {
             AbstractUserWithPower user = UserService.getInstance().login(id, password);
             if (user != null) {
                 frame.dispose();
-                new AdminPanelView(user);
+                if (user instanceof Admin) {
+                    new AdminPanelView(user);
+                } else {
+                    new EmployeePanelView(user);
+                }
             } else {
                 labelError.setText("Credenciales incorrectas.");
             }

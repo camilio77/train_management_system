@@ -22,6 +22,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public class AdminPanelView {
+
     private JFrame frame;
 
     // Colores consistentes con LoginView
@@ -181,8 +182,9 @@ public class AdminPanelView {
     private void loadTrains(DefaultTableModel model) {
         model.setRowCount(0);
         try {
-            for (Train t : TrainService.getInstance().getAll())
+            for (Train t : TrainService.getInstance().getAll()) {
                 model.addRow(new Object[]{t.getId(), t.getName(), t.getType(), t.getMileage()});
+            }
         } catch (Exception ex) {
             showError(ex);
         }
@@ -272,8 +274,9 @@ public class AdminPanelView {
     private void loadStations(DefaultTableModel model) {
         model.setRowCount(0);
         try {
-            for (Station s : StationService.getInstance().getAll())
+            for (Station s : StationService.getInstance().getAll()) {
                 model.addRow(new Object[]{s.getId(), s.getName()});
+            }
         } catch (Exception ex) {
             showError(ex);
         }
@@ -373,8 +376,9 @@ public class AdminPanelView {
     private void loadRoutes(DefaultTableModel model) {
         model.setRowCount(0);
         try {
-            for (Route r : RouteService.getInstance().getAll())
+            for (Route r : RouteService.getInstance().getAll()) {
                 model.addRow(new Object[]{r.getId(), "—", r.getDateOfLeaving(), r.getDateOfArrival()});
+            }
         } catch (Exception ex) {
             showError(ex);
         }
@@ -477,8 +481,9 @@ public class AdminPanelView {
         try {
             String sql = "SELECT v.id_vagon, v.id_tren, v.tipo, v.capacidad FROM vagon v";
             var rs = DatabaseConnection.getConnection().createStatement().executeQuery(sql);
-            while (rs.next())
+            while (rs.next()) {
                 model.addRow(new Object[]{rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getInt(4)});
+            }
         } catch (Exception ex) {
             showError(ex);
         }
@@ -488,7 +493,9 @@ public class AdminPanelView {
     private JPanel buildUserTab() {
         String[] cols = {"Identificación", "Nombres", "Apellidos", "Tipo ID", "Dirección"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
-            public boolean isCellEditable(int r, int c) { return false; }
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         JTable table = styledTable(model);
         loadPassengers(model);
@@ -496,7 +503,7 @@ public class AdminPanelView {
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
         buttons.setBackground(BG);
 
-        JButton btnEdit   = actionButton("✏ Editar",   new Color(30, 58, 95));
+        JButton btnEdit = actionButton("✏ Editar", new Color(30, 58, 95));
         JButton btnDelete = actionButton("🗑 Eliminar", new Color(200, 50, 50));
         JButton btnRefresh = actionButton("↻ Actualizar", new Color(100, 110, 125));
 
@@ -508,34 +515,48 @@ public class AdminPanelView {
 
         btnEdit.addActionListener(e -> {
             int row = table.getSelectedRow();
-            if (row < 0) { JOptionPane.showMessageDialog(frame, "Selecciona un pasajero."); return; }
-            String id     = model.getValueAt(row, 0).toString();
-            JTextField nombres   = new JTextField(model.getValueAt(row, 1).toString());
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Selecciona un pasajero.");
+                return;
+            }
+            String id = model.getValueAt(row, 0).toString();
+            JTextField nombres = new JTextField(model.getValueAt(row, 1).toString());
             JTextField apellidos = new JTextField(model.getValueAt(row, 2).toString());
-            JTextField tipoId    = new JTextField(model.getValueAt(row, 3).toString());
+            JComboBox<String> tipoId = new JComboBox<>(new String[]{"CC", "TI", "CE"});
+            tipoId.setSelectedItem(model.getValueAt(row, 3).toString());
             JTextField direccion = new JTextField(model.getValueAt(row, 4).toString());
             Object[] fields = {"Nombres:", nombres, "Apellidos:", apellidos,
-                            "Tipo ID:", tipoId, "Dirección:", direccion};
+                "Tipo ID:", tipoId, "Dirección:", direccion};
             int r = JOptionPane.showConfirmDialog(frame, fields, "Editar Pasajero", JOptionPane.OK_CANCEL_OPTION);
             if (r == JOptionPane.OK_OPTION) {
                 try {
                     UserService.getInstance().updatePassenger(id,
-                        nombres.getText().trim(), apellidos.getText().trim(),
-                        tipoId.getText().trim(), direccion.getText().trim());
+                            nombres.getText().trim(), apellidos.getText().trim(),
+                            (String) tipoId.getSelectedItem(),
+                            direccion.getText().trim());
                     loadPassengers(model);
-                } catch (Exception ex) { showError(ex); }
+                } catch (Exception ex) {
+                    showError(ex);
+                }
             }
         });
 
         btnDelete.addActionListener(e -> {
             int row = table.getSelectedRow();
-            if (row < 0) { JOptionPane.showMessageDialog(frame, "Selecciona un pasajero."); return; }
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Selecciona un pasajero.");
+                return;
+            }
             String id = model.getValueAt(row, 0).toString();
             int confirm = JOptionPane.showConfirmDialog(frame,
-                "¿Eliminar pasajero " + id + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+                    "¿Eliminar pasajero " + id + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                try { UserService.getInstance().deleteUser(id); loadPassengers(model); }
-                catch (Exception ex) { showError(ex); }
+                try {
+                    UserService.getInstance().deleteUser(id);
+                    loadPassengers(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
             }
         });
 
@@ -545,22 +566,27 @@ public class AdminPanelView {
     private void loadPassengers(DefaultTableModel model) {
         model.setRowCount(0);
         try {
-            for (Passenger p : UserService.getInstance().getAllPassengers())
+            for (Passenger p : UserService.getInstance().getAllPassengers()) {
                 model.addRow(new Object[]{
-                    p.getIdentificacion(), 
+                    p.getIdentificacion(),
                     p.getFullName().split(" ", 2)[0],
                     p.getFullName().split(" ", 2).length > 1 ? p.getFullName().split(" ", 2)[1] : "",
                     p.getIdentificationType(),
                     p.getAddress()
                 });
-        } catch (Exception ex) { showError(ex); }
+            }
+        } catch (Exception ex) {
+            showError(ex);
+        }
     }
 
     // ─── TAB EMPLEADOS ────────────────────────────────────────────
     private JPanel buildEmployeeTab() {
         String[] cols = {"Identificación", "Nombres", "Apellidos", "Tipo ID"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
-            public boolean isCellEditable(int r, int c) { return false; }
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         JTable table = styledTable(model);
         loadEmployees(model);
@@ -568,9 +594,9 @@ public class AdminPanelView {
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
         buttons.setBackground(BG);
 
-        JButton btnAdd    = actionButton("+ Agregar",   new Color(34, 139, 80));
-        JButton btnEdit   = actionButton("✏ Editar",    new Color(30, 58, 95));
-        JButton btnDelete = actionButton("🗑 Eliminar",  new Color(200, 50, 50));
+        JButton btnAdd = actionButton("+ Agregar", new Color(34, 139, 80));
+        JButton btnEdit = actionButton("✏ Editar", new Color(30, 58, 95));
+        JButton btnDelete = actionButton("🗑 Eliminar", new Color(200, 50, 50));
         JButton btnRefresh = actionButton("↻ Actualizar", new Color(100, 110, 125));
 
         buttons.add(btnAdd);
@@ -581,54 +607,68 @@ public class AdminPanelView {
         btnRefresh.addActionListener(e -> loadEmployees(model));
 
         btnAdd.addActionListener(e -> {
-            JTextField id        = new JTextField();
-            JTextField nombres   = new JTextField();
+            JTextField id = new JTextField();
+            JTextField nombres = new JTextField();
             JTextField apellidos = new JTextField();
-            JTextField tipoId    = new JTextField();
-            JPasswordField pass  = new JPasswordField();
+            JComboBox<String> tipoId = new JComboBox<>(new String[]{"CC", "TI", "CE"});
+            JPasswordField pass = new JPasswordField();
             Object[] fields = {"Identificación:", id, "Nombres:", nombres,
-                            "Apellidos:", apellidos, "Tipo ID:", tipoId, "Contraseña:", pass};
+                "Apellidos:", apellidos, "Tipo ID:", tipoId, "Contraseña:", pass};
             int r = JOptionPane.showConfirmDialog(frame, fields, "Agregar Empleado", JOptionPane.OK_CANCEL_OPTION);
             if (r == JOptionPane.OK_OPTION && !id.getText().trim().isEmpty()) {
                 try {
                     Employee emp = new Employee(
-                        id.getText().trim(), nombres.getText().trim(),
-                        apellidos.getText().trim(), tipoId.getText().trim(),
-                        new String(pass.getPassword())
+                            id.getText().trim(), nombres.getText().trim(),
+                            apellidos.getText().trim(), (String) tipoId.getSelectedItem(),
+                            new String(pass.getPassword())
                     );
                     UserService.getInstance().registerEmployee(emp);
                     loadEmployees(model);
-                } catch (Exception ex) { showError(ex); }
+                } catch (Exception ex) {
+                    showError(ex);
+                }
             }
         });
 
         btnEdit.addActionListener(e -> {
             int row = table.getSelectedRow();
-            if (row < 0) { JOptionPane.showMessageDialog(frame, "Selecciona un empleado."); return; }
-            String id     = model.getValueAt(row, 0).toString();
-            JTextField nombres   = new JTextField(model.getValueAt(row, 1).toString());
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Selecciona un empleado.");
+                return;
+            }
+            String id = model.getValueAt(row, 0).toString();
+            JTextField nombres = new JTextField(model.getValueAt(row, 1).toString());
             JTextField apellidos = new JTextField(model.getValueAt(row, 2).toString());
-            JTextField tipoId    = new JTextField(model.getValueAt(row, 3).toString());
+            JComboBox<String> tipoId = new JComboBox<>(new String[]{"CC", "TI", "CE"});
+            tipoId.setSelectedItem(model.getValueAt(row, 3).toString());
             Object[] fields = {"Nombres:", nombres, "Apellidos:", apellidos, "Tipo ID:", tipoId};
             int r = JOptionPane.showConfirmDialog(frame, fields, "Editar Empleado", JOptionPane.OK_CANCEL_OPTION);
             if (r == JOptionPane.OK_OPTION) {
                 try {
-                    UserService.getInstance().updateEmployee(id,
-                        nombres.getText().trim(), apellidos.getText().trim(), tipoId.getText().trim());
+                    UserService.getInstance().updateEmployee(id, nombres.getText().trim(), apellidos.getText().trim(), (String) tipoId.getSelectedItem());
                     loadEmployees(model);
-                } catch (Exception ex) { showError(ex); }
+                } catch (Exception ex) {
+                    showError(ex);
+                }
             }
         });
 
         btnDelete.addActionListener(e -> {
             int row = table.getSelectedRow();
-            if (row < 0) { JOptionPane.showMessageDialog(frame, "Selecciona un empleado."); return; }
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Selecciona un empleado.");
+                return;
+            }
             String id = model.getValueAt(row, 0).toString();
             int confirm = JOptionPane.showConfirmDialog(frame,
-                "¿Eliminar empleado " + id + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+                    "¿Eliminar empleado " + id + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
-                try { UserService.getInstance().deleteUser(id); loadEmployees(model); }
-                catch (Exception ex) { showError(ex); }
+                try {
+                    UserService.getInstance().deleteUser(id);
+                    loadEmployees(model);
+                } catch (Exception ex) {
+                    showError(ex);
+                }
             }
         });
 
@@ -638,14 +678,17 @@ public class AdminPanelView {
     private void loadEmployees(DefaultTableModel model) {
         model.setRowCount(0);
         try {
-            for (Employee emp : UserService.getInstance().getAllEmployees())
+            for (Employee emp : UserService.getInstance().getAllEmployees()) {
                 model.addRow(new Object[]{
                     emp.getIdentificacion(),
                     emp.getFullName().split(" ", 2)[0],
                     emp.getFullName().split(" ", 2).length > 1 ? emp.getFullName().split(" ", 2)[1] : "",
                     emp.getIdentificationType()
                 });
-        } catch (Exception ex) { showError(ex); }
+            }
+        } catch (Exception ex) {
+            showError(ex);
+        }
     }
 
     // ─── HELPERS ──────────────────────────────────────────────────
@@ -660,10 +703,11 @@ public class AdminPanelView {
 
     private void showEditAdminDialog(AbstractUserWithPower admin) {
         String[] nameParts = admin.getFullName().split(" ", 2);
-        JTextField nombres   = new JTextField(nameParts[0]);
+        JTextField nombres = new JTextField(nameParts[0]);
         JTextField apellidos = new JTextField(nameParts.length > 1 ? nameParts[1] : "");
-        JTextField tipoId    = new JTextField(admin.getIdentificationType());
-        JPasswordField pass  = new JPasswordField(admin.getPassword());
+        JComboBox<String> tipoId = new JComboBox<>(new String[]{"CC", "TI", "CE"});
+        tipoId.setSelectedItem(admin.getIdentificationType());
+        JPasswordField pass = new JPasswordField(admin.getPassword());
         JPasswordField confirmPass = new JPasswordField(admin.getPassword());
 
         Object[] fields = {
@@ -684,14 +728,16 @@ public class AdminPanelView {
             }
             try {
                 UserService.getInstance().updateAdmin(
-                    admin.getIdentificacion(),
-                    nombres.getText().trim(),
-                    apellidos.getText().trim(),
-                    tipoId.getText().trim(),
-                    p1
+                        admin.getIdentificacion(),
+                        nombres.getText().trim(),
+                        apellidos.getText().trim(),
+                        (String) tipoId.getSelectedItem(),
+                        p1
                 );
                 JOptionPane.showMessageDialog(frame, "Perfil actualizado correctamente.");
-            } catch (Exception ex) { showError(ex); }
+            } catch (Exception ex) {
+                showError(ex);
+            }
         }
     }
 
@@ -732,9 +778,8 @@ public class AdminPanelView {
     }
 
     /**
-     * Method generated by IntelliJ IDEA GUI Designer
-     * >>> IMPORTANT!! <<<
-     * DO NOT edit this method OR call it in your code!
+     * Method generated by IntelliJ IDEA GUI Designer >>> IMPORTANT!! <<< DO NOT
+     * edit this method OR call it in your code!
      *
      * @noinspection ALL
      */
