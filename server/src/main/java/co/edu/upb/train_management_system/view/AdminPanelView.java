@@ -8,6 +8,9 @@ import co.edu.upb.train_management_system.model.station.StationService;
 import co.edu.upb.train_management_system.model.train.Train;
 import co.edu.upb.train_management_system.model.train.TrainService;
 import co.edu.upb.train_management_system.model.user.AbstractUserWithPower;
+import co.edu.upb.train_management_system.model.user.Employee;
+import co.edu.upb.train_management_system.model.user.Passenger;
+import co.edu.upb.train_management_system.model.user.UserService;
 import co.edu.upb.train_management_system.model.wagon.Wagon;
 import co.edu.upb.train_management_system.model.wagon.WagonService;
 
@@ -45,6 +48,14 @@ public class AdminPanelView {
         adminName.setFont(new Font("Arial", Font.PLAIN, 13));
         adminName.setForeground(new Color(180, 200, 220));
 
+        JButton btnEditProfile = new JButton("✏ Mi Perfil");
+        btnEditProfile.setBackground(new Color(60, 100, 150));
+        btnEditProfile.setForeground(Color.WHITE);
+        btnEditProfile.setFocusPainted(false);
+        btnEditProfile.setBorderPainted(false);
+        btnEditProfile.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnEditProfile.addActionListener(e -> showEditAdminDialog(admin));
+
         JButton btnLogout = new JButton("Cerrar Sesión");
         btnLogout.setBackground(new Color(220, 60, 60));
         btnLogout.setForeground(Color.WHITE);
@@ -59,6 +70,7 @@ public class AdminPanelView {
         JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         headerRight.setOpaque(false);
         headerRight.add(adminName);
+        headerRight.add(btnEditProfile);
         headerRight.add(btnLogout);
 
         header.add(title, BorderLayout.WEST);
@@ -72,6 +84,8 @@ public class AdminPanelView {
         tabs.addTab("🏛 Estaciones", buildStationTab());
         tabs.addTab("🛤 Rutas", buildRouteTab());
         tabs.addTab("🚃 Vagones", buildWagonTab());
+        tabs.addTab("👥 Empleados", buildEmployeeTab());
+        tabs.addTab("👥 Usuarios", buildUserTab());
 
         frame.add(header, BorderLayout.NORTH);
         frame.add(tabs, BorderLayout.CENTER);
@@ -470,6 +484,170 @@ public class AdminPanelView {
         }
     }
 
+    // ─── TAB PASAJEROS ────────────────────────────────────────────
+    private JPanel buildUserTab() {
+        String[] cols = {"Identificación", "Nombres", "Apellidos", "Tipo ID", "Dirección"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            public boolean isCellEditable(int r, int c) { return false; }
+        };
+        JTable table = styledTable(model);
+        loadPassengers(model);
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        buttons.setBackground(BG);
+
+        JButton btnEdit   = actionButton("✏ Editar",   new Color(30, 58, 95));
+        JButton btnDelete = actionButton("🗑 Eliminar", new Color(200, 50, 50));
+        JButton btnRefresh = actionButton("↻ Actualizar", new Color(100, 110, 125));
+
+        buttons.add(btnEdit);
+        buttons.add(btnDelete);
+        buttons.add(btnRefresh);
+
+        btnRefresh.addActionListener(e -> loadPassengers(model));
+
+        btnEdit.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row < 0) { JOptionPane.showMessageDialog(frame, "Selecciona un pasajero."); return; }
+            String id     = model.getValueAt(row, 0).toString();
+            JTextField nombres   = new JTextField(model.getValueAt(row, 1).toString());
+            JTextField apellidos = new JTextField(model.getValueAt(row, 2).toString());
+            JTextField tipoId    = new JTextField(model.getValueAt(row, 3).toString());
+            JTextField direccion = new JTextField(model.getValueAt(row, 4).toString());
+            Object[] fields = {"Nombres:", nombres, "Apellidos:", apellidos,
+                            "Tipo ID:", tipoId, "Dirección:", direccion};
+            int r = JOptionPane.showConfirmDialog(frame, fields, "Editar Pasajero", JOptionPane.OK_CANCEL_OPTION);
+            if (r == JOptionPane.OK_OPTION) {
+                try {
+                    UserService.getInstance().updatePassenger(id,
+                        nombres.getText().trim(), apellidos.getText().trim(),
+                        tipoId.getText().trim(), direccion.getText().trim());
+                    loadPassengers(model);
+                } catch (Exception ex) { showError(ex); }
+            }
+        });
+
+        btnDelete.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row < 0) { JOptionPane.showMessageDialog(frame, "Selecciona un pasajero."); return; }
+            String id = model.getValueAt(row, 0).toString();
+            int confirm = JOptionPane.showConfirmDialog(frame,
+                "¿Eliminar pasajero " + id + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                try { UserService.getInstance().deleteUser(id); loadPassengers(model); }
+                catch (Exception ex) { showError(ex); }
+            }
+        });
+
+        return buildTabPanel(table, buttons);
+    }
+
+    private void loadPassengers(DefaultTableModel model) {
+        model.setRowCount(0);
+        try {
+            for (Passenger p : UserService.getInstance().getAllPassengers())
+                model.addRow(new Object[]{
+                    p.getIdentificacion(), 
+                    p.getFullName().split(" ", 2)[0],
+                    p.getFullName().split(" ", 2).length > 1 ? p.getFullName().split(" ", 2)[1] : "",
+                    p.getIdentificationType(),
+                    p.getAddress()
+                });
+        } catch (Exception ex) { showError(ex); }
+    }
+
+    // ─── TAB EMPLEADOS ────────────────────────────────────────────
+    private JPanel buildEmployeeTab() {
+        String[] cols = {"Identificación", "Nombres", "Apellidos", "Tipo ID"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0) {
+            public boolean isCellEditable(int r, int c) { return false; }
+        };
+        JTable table = styledTable(model);
+        loadEmployees(model);
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        buttons.setBackground(BG);
+
+        JButton btnAdd    = actionButton("+ Agregar",   new Color(34, 139, 80));
+        JButton btnEdit   = actionButton("✏ Editar",    new Color(30, 58, 95));
+        JButton btnDelete = actionButton("🗑 Eliminar",  new Color(200, 50, 50));
+        JButton btnRefresh = actionButton("↻ Actualizar", new Color(100, 110, 125));
+
+        buttons.add(btnAdd);
+        buttons.add(btnEdit);
+        buttons.add(btnDelete);
+        buttons.add(btnRefresh);
+
+        btnRefresh.addActionListener(e -> loadEmployees(model));
+
+        btnAdd.addActionListener(e -> {
+            JTextField id        = new JTextField();
+            JTextField nombres   = new JTextField();
+            JTextField apellidos = new JTextField();
+            JTextField tipoId    = new JTextField();
+            JPasswordField pass  = new JPasswordField();
+            Object[] fields = {"Identificación:", id, "Nombres:", nombres,
+                            "Apellidos:", apellidos, "Tipo ID:", tipoId, "Contraseña:", pass};
+            int r = JOptionPane.showConfirmDialog(frame, fields, "Agregar Empleado", JOptionPane.OK_CANCEL_OPTION);
+            if (r == JOptionPane.OK_OPTION && !id.getText().trim().isEmpty()) {
+                try {
+                    Employee emp = new Employee(
+                        id.getText().trim(), nombres.getText().trim(),
+                        apellidos.getText().trim(), tipoId.getText().trim(),
+                        new String(pass.getPassword())
+                    );
+                    UserService.getInstance().registerEmployee(emp);
+                    loadEmployees(model);
+                } catch (Exception ex) { showError(ex); }
+            }
+        });
+
+        btnEdit.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row < 0) { JOptionPane.showMessageDialog(frame, "Selecciona un empleado."); return; }
+            String id     = model.getValueAt(row, 0).toString();
+            JTextField nombres   = new JTextField(model.getValueAt(row, 1).toString());
+            JTextField apellidos = new JTextField(model.getValueAt(row, 2).toString());
+            JTextField tipoId    = new JTextField(model.getValueAt(row, 3).toString());
+            Object[] fields = {"Nombres:", nombres, "Apellidos:", apellidos, "Tipo ID:", tipoId};
+            int r = JOptionPane.showConfirmDialog(frame, fields, "Editar Empleado", JOptionPane.OK_CANCEL_OPTION);
+            if (r == JOptionPane.OK_OPTION) {
+                try {
+                    UserService.getInstance().updateEmployee(id,
+                        nombres.getText().trim(), apellidos.getText().trim(), tipoId.getText().trim());
+                    loadEmployees(model);
+                } catch (Exception ex) { showError(ex); }
+            }
+        });
+
+        btnDelete.addActionListener(e -> {
+            int row = table.getSelectedRow();
+            if (row < 0) { JOptionPane.showMessageDialog(frame, "Selecciona un empleado."); return; }
+            String id = model.getValueAt(row, 0).toString();
+            int confirm = JOptionPane.showConfirmDialog(frame,
+                "¿Eliminar empleado " + id + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                try { UserService.getInstance().deleteUser(id); loadEmployees(model); }
+                catch (Exception ex) { showError(ex); }
+            }
+        });
+
+        return buildTabPanel(table, buttons);
+    }
+
+    private void loadEmployees(DefaultTableModel model) {
+        model.setRowCount(0);
+        try {
+            for (Employee emp : UserService.getInstance().getAllEmployees())
+                model.addRow(new Object[]{
+                    emp.getIdentificacion(),
+                    emp.getFullName().split(" ", 2)[0],
+                    emp.getFullName().split(" ", 2).length > 1 ? emp.getFullName().split(" ", 2)[1] : "",
+                    emp.getIdentificationType()
+                });
+        } catch (Exception ex) { showError(ex); }
+    }
+
     // ─── HELPERS ──────────────────────────────────────────────────
     private JPanel buildTabPanel(JTable table, JPanel buttons) {
         JPanel panel = new JPanel(new BorderLayout(0, 0));
@@ -478,6 +656,43 @@ public class AdminPanelView {
         panel.add(buttons, BorderLayout.NORTH);
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
         return panel;
+    }
+
+    private void showEditAdminDialog(AbstractUserWithPower admin) {
+        String[] nameParts = admin.getFullName().split(" ", 2);
+        JTextField nombres   = new JTextField(nameParts[0]);
+        JTextField apellidos = new JTextField(nameParts.length > 1 ? nameParts[1] : "");
+        JTextField tipoId    = new JTextField(admin.getIdentificationType());
+        JPasswordField pass  = new JPasswordField(admin.getPassword());
+        JPasswordField confirmPass = new JPasswordField(admin.getPassword());
+
+        Object[] fields = {
+            "Nombres:", nombres,
+            "Apellidos:", apellidos,
+            "Tipo ID:", tipoId,
+            "Nueva contraseña:", pass,
+            "Confirmar contraseña:", confirmPass
+        };
+
+        int r = JOptionPane.showConfirmDialog(frame, fields, "Editar mi perfil", JOptionPane.OK_CANCEL_OPTION);
+        if (r == JOptionPane.OK_OPTION) {
+            String p1 = new String(pass.getPassword());
+            String p2 = new String(confirmPass.getPassword());
+            if (!p1.equals(p2)) {
+                JOptionPane.showMessageDialog(frame, "Las contraseñas no coinciden.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            try {
+                UserService.getInstance().updateAdmin(
+                    admin.getIdentificacion(),
+                    nombres.getText().trim(),
+                    apellidos.getText().trim(),
+                    tipoId.getText().trim(),
+                    p1
+                );
+                JOptionPane.showMessageDialog(frame, "Perfil actualizado correctamente.");
+            } catch (Exception ex) { showError(ex); }
+        }
     }
 
     private JTable styledTable(DefaultTableModel model) {
