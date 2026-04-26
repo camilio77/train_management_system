@@ -3,9 +3,11 @@ package co.edu.upb.train_management_system.model.ticket;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
+import co.edu.upb.app.LinkedList.singly.LinkedList;
+
 public class TicketService extends UnicastRemoteObject implements TicketInterface {
   private int index = 0;
-  private Ticket[] tickets = new Ticket[100];
+  private LinkedList<Ticket> tickets = new LinkedList<>();
 
   public TicketService() throws RemoteException {
     super();
@@ -13,19 +15,14 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
 
   @Override
   public Ticket register(Ticket ticket) throws RemoteException {
-    Ticket newTicket = new Ticket(String.valueOf(index + 1), new Customer("1", ticket.getCustomerName()));
-    tickets[index] = newTicket;
+    Ticket newTicket = new Ticket(index, ticket.getPassenger(), ticket.getCategory(), ticket.getWagon(), ticket.getDateOfPurchase(), ticket.getTotal());
+    tickets.add(newTicket);
     index++;
     return newTicket;
   }
 
   @Override
   public boolean validate(Ticket ticket) throws RemoteException {
-    for (int i = 0; i < index; i++) {
-      if (tickets[i].equals(ticket)) {
-        return true;
-      }
-    }
-    return false;
+    return tickets.contains(ticket);
   }
 }

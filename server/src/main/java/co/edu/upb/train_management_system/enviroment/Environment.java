@@ -38,7 +38,7 @@ public class Environment {
       System.setProperty("server.ip", (String) config.get("SERVER_IP"));
       System.setProperty("server.port", (String) config.get("SERVER_PORT"));
       System.setProperty("server.name", (String) config.get("SERVER_NAME"));
-      System.setProperty("serever.database", (String) config.get("DATABASE_IP"));
+      System.setProperty("server.database", (String) config.get("DATABASE_IP"));
     } catch (Exception e) {
       e.printStackTrace();
     }

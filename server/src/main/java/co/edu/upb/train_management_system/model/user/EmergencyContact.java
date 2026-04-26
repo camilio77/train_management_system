@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class EmergencyContact extends AbstractUser implements Serializable{
 
-    public EmergencyContact(int identificacion, String names, String lastNames, String identificationType) {
+    public EmergencyContact(String identificacion, String names, String lastNames, String identificationType) {
         super(identificacion, names, lastNames, identificationType);
     }
 }
