@@ -30,9 +30,7 @@
         <dependency>
             <groupId>co.edu.upb</groupId>
             <artifactId>array</artifactId>
-            <version>0.0.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/array.jar</systemPath>
+            <version>1.0</version>
         </dependency>
     </dependencies>
     <build>
@@ -59,6 +57,16 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>co.edu.upb.train_management_system.App</mainClass>
+                    <includeProjectDependencies>true</includeProjectDependencies>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -40,7 +40,11 @@ public class WagonService {
         PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(sql);
         stmt.setInt(1, idTren);
         stmt.setString(2, tipo);
-        stmt.setInt(3, capacidad);
+        if(tipo.equals("PASAJEROS")){
+            stmt.setInt(3, 32);
+        } else {
+            stmt.setInt(3, 64);
+        }
         stmt.executeUpdate();
     }
 

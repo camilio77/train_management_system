@@ -2,91 +2,66 @@ package co.edu.upb.train_management_system.model.route;
 
 import java.util.Date;
 
-import co.edu.upb.app.Queue.dinamic.Queue;
 import co.edu.upb.train_management_system.model.station.Station;
 import co.edu.upb.train_management_system.model.train.Train;
 
 public class Route {
-    private int id;
+    private String id;
     private Date dateOfLeaving;
     private Date dateOfArrival;
-    private Queue<Train> trains;
-    private int idTren;
+    private Train train;
     private Station origin;
     private Station destination;
 
-    public Route(int id, Date dateOfLeaving, Date dateOfArrival) {
+    public Route(String id, Date dateOfLeaving, Date dateOfArrival) {
         this.id = id;
         this.dateOfLeaving = dateOfLeaving;
-        this.trains = new Queue<>();
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public Date getDateOfLeaving() {
-        return dateOfLeaving;
-    }
-
-    public Station getOriginStation() {
-        return origin;
-    }
-
-    public Station getDestinationStation() {
-        return destination;
-    }
-
-    public Date getDateOfArrival() {
-        return dateOfArrival;
-    }
-
-    public boolean setDateOfArrival(Date dateOfArrival) {
         this.dateOfArrival = dateOfArrival;
-        return true;
     }
 
-    public boolean setDateOfLeaving(Date dateOfLeaving) {
+    public Route(String id, Date dateOfLeaving, Date dateOfArrival,
+                 Train train, Station origin, Station destination) {
+        this.id = id;
         this.dateOfLeaving = dateOfLeaving;
-        return true;
+        this.dateOfArrival = dateOfArrival;
+        this.train = train;
+        this.origin = origin;
+        this.destination = destination;
     }
-    
 
-    public int calculateDistance(){
+    // Getters
+    public String getId()                  { return id; }
+    public Date getDateOfLeaving()      { return dateOfLeaving; }
+    public Date getDateOfArrival()      { return dateOfArrival; }
+    public Train getTrain()             { return train; }
+    public Station getOriginStation()   { return origin; }
+    public Station getDestinationStation() { return destination; }
+
+    // Setters
+    public void setDateOfLeaving(Date d)   { this.dateOfLeaving = d; }
+    public void setDateOfArrival(Date d)   { this.dateOfArrival = d; }
+    public void setTrain(Train t)          { this.train = t; }
+    public void setOrigin(Station s)       { this.origin = s; }
+    public void setDestination(Station s)  { this.destination = s; }
+
+    // Helpers de conveniencia
+    public String getTrainId() {
+        return train.getId();
+    }
+
+    public String getTrainName() {
+        return train != null ? train.getName() : "Sin tren";
+    }
+
+    public String getOriginName() {
+        return origin != null ? origin.getName() : "—";
+    }
+
+    public String getDestinationName() {
+        return destination != null ? destination.getName() : "—";
+    }
+
+    public int calculateDistance() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
-
-    public boolean setTrains(Queue<Train> trains) {
-        this.trains = trains;
-        return true;
-    }
-
-    public boolean setOrigin(Station origin) {
-        this.origin = origin;
-        return true;
-    }
-
-    public boolean setDestination(Station destination) {
-        this.destination = destination;
-        return true;
-    }
-
-    public Train[] getTrains() {
-        Train[] trainArray = new Train[trains.size()];
-        trains.forEach(train -> {
-            for (int i = 0; i < trainArray.length; i++) {
-                if (trainArray[i] == null) {
-                    trainArray[i] = train;
-                    break;
-                }
-            }
-            return null;
-        });
-        return trainArray;
-    }
-
-    public int getIdTren() { return idTren; }
-
-    public void setIdTren(int idTren) { this.idTren = idTren; }
-     
 }
