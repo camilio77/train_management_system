@@ -1,15 +1,11 @@
 package co.edu.upb.train_management_system.model.user;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
-
+import co.edu.upb.app.LinkedList.singly.LinkedList;
 import co.edu.upb.train_management_system.DataBase.DatabaseConnection;
 
-public class UserService {
+import java.sql.*;
 
+public class UserService {
     private static UserService instance;
     private UserService() {}
     public static UserService getInstance() {
@@ -24,25 +20,14 @@ public class UserService {
         stmt.setString(1, identificacion);
         stmt.setString(2, contrasena);
         ResultSet rs = stmt.executeQuery();
-
         if (rs.next()) {
             String tipo = rs.getString("tipo");
             if (tipo.equals("ADMINISTRADOR")) {
-                return new Admin(
-                    rs.getString("identificacion"),
-                    rs.getString("nombres"),
-                    rs.getString("apellidos"),
-                    rs.getString("tipo_identificacion"),
-                    rs.getString("contrasena")
-                );
+                return new Admin(rs.getString("identificacion"), rs.getString("nombres"),
+                        rs.getString("apellidos"), rs.getString("tipo_identificacion"), rs.getString("contrasena"));
             } else {
-                return new Employee(
-                    rs.getString("identificacion"),
-                    rs.getString("nombres"),
-                    rs.getString("apellidos"),
-                    rs.getString("tipo_identificacion"),
-                    rs.getString("contrasena")
-                );
+                return new Employee(rs.getString("identificacion"), rs.getString("nombres"),
+                        rs.getString("apellidos"), rs.getString("tipo_identificacion"), rs.getString("contrasena"));
             }
         }
         return null;
@@ -65,19 +50,16 @@ public class UserService {
         return true;
     }
 
-    public List<Passenger> getAllPassengers() throws Exception {
-        List<Passenger> list = new ArrayList<>();
+    public LinkedList<Passenger> getAllPassengers() throws Exception {
+        LinkedList<Passenger> list = new LinkedList<>();
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "SELECT * FROM usuario WHERE tipo = 'PASAJERO'";
-        ResultSet rs = conn.createStatement().executeQuery(sql);
+        ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM usuario WHERE tipo = 'PASAJERO'");
         while (rs.next()) {
             list.add(new Passenger(
-                rs.getString("identificacion"),
-                rs.getString("nombres"),
-                rs.getString("apellidos"),
-                rs.getString("tipo_identificacion"),
-                rs.getString("direccion") != null ? rs.getString("direccion") : "",
-                rs.getString("contrasena")
+                    rs.getString("identificacion"), rs.getString("nombres"),
+                    rs.getString("apellidos"),      rs.getString("tipo_identificacion"),
+                    rs.getString("direccion") != null ? rs.getString("direccion") : "",
+                    rs.getString("contrasena")
             ));
         }
         return list;
@@ -88,19 +70,16 @@ public class UserService {
         Connection conn = DatabaseConnection.getConnection();
         String sql = "UPDATE usuario SET nombres=?, apellidos=?, tipo_identificacion=?, direccion=? WHERE identificacion=? AND tipo='PASAJERO'";
         PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, nombres);
-        stmt.setString(2, apellidos);
-        stmt.setString(3, tipoId);
-        stmt.setString(4, direccion);
+        stmt.setString(1, nombres); stmt.setString(2, apellidos);
+        stmt.setString(3, tipoId);  stmt.setString(4, direccion);
         stmt.setString(5, identificacion);
         stmt.executeUpdate();
         return true;
     }
 
     public boolean deleteUser(String identificacion) throws Exception {
-        Connection conn = DatabaseConnection.getConnection();
         String sql = "DELETE FROM usuario WHERE identificacion=?";
-        PreparedStatement stmt = conn.prepareStatement(sql);
+        PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(sql);
         stmt.setString(1, identificacion);
         stmt.executeUpdate();
         return true;
@@ -122,18 +101,15 @@ public class UserService {
         return true;
     }
 
-    public List<Employee> getAllEmployees() throws Exception {
-        List<Employee> list = new ArrayList<>();
+    public LinkedList<Employee> getAllEmployees() throws Exception {
+        LinkedList<Employee> list = new LinkedList<>();
         Connection conn = DatabaseConnection.getConnection();
-        String sql = "SELECT * FROM usuario WHERE tipo = 'EMPLEADO'";
-        ResultSet rs = conn.createStatement().executeQuery(sql);
+        ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM usuario WHERE tipo = 'EMPLEADO'");
         while (rs.next()) {
             list.add(new Employee(
-                rs.getString("identificacion"),
-                rs.getString("nombres"),
-                rs.getString("apellidos"),
-                rs.getString("tipo_identificacion"),
-                rs.getString("contrasena")
+                    rs.getString("identificacion"), rs.getString("nombres"),
+                    rs.getString("apellidos"),      rs.getString("tipo_identificacion"),
+                    rs.getString("contrasena")
             ));
         }
         return list;
@@ -141,13 +117,10 @@ public class UserService {
 
     public boolean updateEmployee(String identificacion, String nombres, String apellidos,
                                   String tipoId) throws Exception {
-        Connection conn = DatabaseConnection.getConnection();
         String sql = "UPDATE usuario SET nombres=?, apellidos=?, tipo_identificacion=? WHERE identificacion=? AND tipo='EMPLEADO'";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, nombres);
-        stmt.setString(2, apellidos);
-        stmt.setString(3, tipoId);
-        stmt.setString(4, identificacion);
+        PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(sql);
+        stmt.setString(1, nombres); stmt.setString(2, apellidos);
+        stmt.setString(3, tipoId);  stmt.setString(4, identificacion);
         stmt.executeUpdate();
         return true;
     }
@@ -156,13 +129,10 @@ public class UserService {
 
     public boolean updateAdmin(String identificacion, String nombres, String apellidos,
                                String tipoId, String nuevaContrasena) throws Exception {
-        Connection conn = DatabaseConnection.getConnection();
         String sql = "UPDATE usuario SET nombres=?, apellidos=?, tipo_identificacion=?, contrasena=? WHERE identificacion=? AND tipo='ADMINISTRADOR'";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, nombres);
-        stmt.setString(2, apellidos);
-        stmt.setString(3, tipoId);
-        stmt.setString(4, nuevaContrasena);
+        PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(sql);
+        stmt.setString(1, nombres); stmt.setString(2, apellidos);
+        stmt.setString(3, tipoId);  stmt.setString(4, nuevaContrasena);
         stmt.setString(5, identificacion);
         stmt.executeUpdate();
         return true;

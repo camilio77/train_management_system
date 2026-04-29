@@ -1,9 +1,9 @@
 package co.edu.upb.train_management_system.model.train;
 
+import co.edu.upb.app.LinkedList.singly.LinkedList;
 import co.edu.upb.train_management_system.DataBase.DatabaseConnection;
+
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class TrainService {
     private static TrainService instance;
@@ -13,8 +13,8 @@ public class TrainService {
         return instance;
     }
 
-    public List<Train> getAll() throws SQLException {
-        List<Train> list = new ArrayList<>();
+    public LinkedList<Train> getAll() throws SQLException {
+        LinkedList<Train> list = new LinkedList<>();
         String sql = "SELECT * FROM tren";
         ResultSet rs = DatabaseConnection.getConnection().createStatement().executeQuery(sql);
         while (rs.next()) {

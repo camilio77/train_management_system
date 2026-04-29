@@ -1,12 +1,12 @@
 package co.edu.upb.train_management_system.model.route;
 
+import co.edu.upb.app.LinkedList.singly.LinkedList;
+import co.edu.upb.model.list.List;
 import co.edu.upb.train_management_system.DataBase.DatabaseConnection;
 import co.edu.upb.train_management_system.model.station.Station;
 import co.edu.upb.train_management_system.model.train.Train;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class RouteService {
     private static RouteService instance;
@@ -18,8 +18,8 @@ public class RouteService {
         return instance;
     }
 
-    public List<Route> getAll() throws SQLException {
-        List<Route> list = new ArrayList<>();
+    public LinkedList<Route> getAll() throws SQLException {
+        LinkedList<Route> list = new LinkedList<>();
         Connection conn = DatabaseConnection.getConnection();
 
         String sql = """
@@ -33,46 +33,52 @@ public class RouteService {
         ResultSet rs = conn.createStatement().executeQuery(sql);
         while (rs.next()) {
             Train train = new Train(
-                String.valueOf(rs.getInt("id_tren")),   // int → String
-                rs.getString("tren_nombre")
+                    String.valueOf(rs.getInt("id_tren")),
+                    rs.getString("tren_nombre")
             );
-            train.setType(rs.getString("tren_tipo"));   // era "tren_tipo" literal — bug corregido
+            train.setType(rs.getString("tren_tipo"));
             train.setMileage(rs.getInt("kilometraje"));
 
             Route route = new Route(
-                String.valueOf(rs.getInt("id_ruta")),   // int → String
-                rs.getTimestamp("fecha_salida"),
-                rs.getTimestamp("fecha_llegada"),
-                train, null, null
+                    String.valueOf(rs.getInt("id_ruta")),
+                    rs.getTimestamp("fecha_salida"),
+                    rs.getTimestamp("fecha_llegada"),
+                    train, null, null
             );
             list.add(route);
         }
 
-        for (Route route : list) {
-            String stationSql = """
-                SELECT e.id_estacion, e.nombre, re.orden
-                FROM ruta_estacion re
-                JOIN estacion e ON re.id_estacion = e.id_estacion
-                WHERE re.id_ruta = ?
-                ORDER BY re.orden
-                """;
+        // Para iterar la lista y cargar estaciones usamos el iterator propio
+        list.forEach(route -> {
+            try {
+                String stationSql = """
+                    SELECT e.id_estacion, e.nombre, re.orden
+                    FROM ruta_estacion re
+                    JOIN estacion e ON re.id_estacion = e.id_estacion
+                    WHERE re.id_ruta = ?
+                    ORDER BY re.orden
+                    """;
 
-            PreparedStatement ps = conn.prepareStatement(stationSql);
-            ps.setInt(1, Integer.parseInt(route.getId()));  // String → int para el prepared statement
-            ResultSet stRs = ps.executeQuery();
+                PreparedStatement ps = conn.prepareStatement(stationSql);
+                ps.setInt(1, Integer.parseInt(route.getId()));
+                ResultSet stRs = ps.executeQuery();
 
-            Station first = null, last = null;
-            while (stRs.next()) {
-                Station s = new Station(
-                    String.valueOf(stRs.getInt("id_estacion")),  // int → String
-                    stRs.getString("nombre")
-                );
-                if (first == null) first = s;
-                last = s;
+                Station first = null, last = null;
+                while (stRs.next()) {
+                    Station s = new Station(
+                            String.valueOf(stRs.getInt("id_estacion")),
+                            stRs.getString("nombre")
+                    );
+                    if (first == null) first = s;
+                    last = s;
+                }
+                route.setOrigin(first);
+                route.setDestination(last);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-            route.setOrigin(first);
-            route.setDestination(last);
-        }
+            return null; // forEach espera Function<E, Void>
+        });
 
         return list;
     }
@@ -84,7 +90,7 @@ public class RouteService {
         try {
             String sql = "INSERT INTO ruta (id_tren, fecha_salida, fecha_llegada) VALUES (?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            stmt.setInt(1, Integer.parseInt(idTren));       // String → int
+            stmt.setInt(1, Integer.parseInt(idTren));
             stmt.setTimestamp(2, salida);
             stmt.setTimestamp(3, llegada);
             stmt.executeUpdate();
@@ -97,12 +103,12 @@ public class RouteService {
             PreparedStatement stStmt = conn.prepareStatement(stSql);
 
             stStmt.setInt(1, idRuta);
-            stStmt.setInt(2, Integer.parseInt(idOrigen));   // String → int
+            stStmt.setInt(2, Integer.parseInt(idOrigen));
             stStmt.setInt(3, 1);
             stStmt.executeUpdate();
 
             stStmt.setInt(1, idRuta);
-            stStmt.setInt(2, Integer.parseInt(idDestino));  // String → int
+            stStmt.setInt(2, Integer.parseInt(idDestino));
             stStmt.setInt(3, 2);
             stStmt.executeUpdate();
 
@@ -120,7 +126,7 @@ public class RouteService {
         PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(sql);
         stmt.setTimestamp(1, salida);
         stmt.setTimestamp(2, llegada);
-        stmt.setInt(3, Integer.parseInt(id));               // String → int
+        stmt.setInt(3, Integer.parseInt(id));
         stmt.executeUpdate();
     }
 
@@ -129,13 +135,13 @@ public class RouteService {
         conn.setAutoCommit(false);
         try {
             PreparedStatement stStmt = conn.prepareStatement(
-                "DELETE FROM ruta_estacion WHERE id_ruta=?");
-            stStmt.setInt(1, Integer.parseInt(id));         // String → int
+                    "DELETE FROM ruta_estacion WHERE id_ruta=?");
+            stStmt.setInt(1, Integer.parseInt(id));
             stStmt.executeUpdate();
 
             PreparedStatement rStmt = conn.prepareStatement(
-                "DELETE FROM ruta WHERE id_ruta=?");
-            rStmt.setInt(1, Integer.parseInt(id));          // String → int
+                    "DELETE FROM ruta WHERE id_ruta=?");
+            rStmt.setInt(1, Integer.parseInt(id));
             rStmt.executeUpdate();
 
             conn.commit();

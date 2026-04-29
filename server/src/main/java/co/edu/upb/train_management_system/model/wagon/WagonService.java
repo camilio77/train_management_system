@@ -1,9 +1,9 @@
 package co.edu.upb.train_management_system.model.wagon;
 
+import co.edu.upb.app.LinkedList.singly.LinkedList;
 import co.edu.upb.train_management_system.DataBase.DatabaseConnection;
+
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class WagonService {
     private static WagonService instance;
@@ -13,25 +13,23 @@ public class WagonService {
         return instance;
     }
 
-    public List<Wagon> getByTrain(int idTren) throws SQLException {
-        List<Wagon> list = new ArrayList<>();
+    public LinkedList<Wagon> getByTrain(int idTren) throws SQLException {
+        LinkedList<Wagon> list = new LinkedList<>();
         String sql = "SELECT * FROM vagon WHERE id_tren=?";
         PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(sql);
         stmt.setInt(1, idTren);
         ResultSet rs = stmt.executeQuery();
-        while (rs.next()) {
+        while (rs.next())
             list.add(new Wagon(String.valueOf(rs.getInt("id_vagon"))));
-        }
         return list;
     }
 
-    public List<Wagon> getAll() throws SQLException {
-        List<Wagon> list = new ArrayList<>();
+    public LinkedList<Wagon> getAll() throws SQLException {
+        LinkedList<Wagon> list = new LinkedList<>();
         String sql = "SELECT * FROM vagon";
         ResultSet rs = DatabaseConnection.getConnection().createStatement().executeQuery(sql);
-        while (rs.next()) {
+        while (rs.next())
             list.add(new Wagon(String.valueOf(rs.getInt("id_vagon"))));
-        }
         return list;
     }
 
@@ -40,11 +38,7 @@ public class WagonService {
         PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(sql);
         stmt.setInt(1, idTren);
         stmt.setString(2, tipo);
-        if(tipo.equals("PASAJEROS")){
-            stmt.setInt(3, 32);
-        } else {
-            stmt.setInt(3, 64);
-        }
+        stmt.setInt(3, tipo.equals("PASAJEROS") ? 32 : 64);
         stmt.executeUpdate();
     }
 

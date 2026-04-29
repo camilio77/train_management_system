@@ -1,13 +1,7 @@
 package co.edu.upb.train_management_system.view;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.FlowLayout;
-import java.awt.Font;
+import java.awt.*;
 import java.sql.Timestamp;
-import java.util.List;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
@@ -26,6 +20,7 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import co.edu.upb.app.LinkedList.singly.LinkedList;
 import co.edu.upb.train_management_system.DataBase.DatabaseConnection;
 import co.edu.upb.train_management_system.model.route.Route;
 import co.edu.upb.train_management_system.model.route.RouteService;
@@ -200,9 +195,10 @@ public class AdminPanelView {
     private void loadTrains(DefaultTableModel model) {
         model.setRowCount(0);
         try {
-            for (Train t : TrainService.getInstance().getAll()) {
+            TrainService.getInstance().getAll().forEach(t -> {
                 model.addRow(new Object[]{t.getId(), t.getName(), t.getType(), t.getMileage()});
-            }
+                return null;
+            });
         } catch (Exception ex) {
             showError(ex);
         }
@@ -292,9 +288,10 @@ public class AdminPanelView {
     private void loadStations(DefaultTableModel model) {
         model.setRowCount(0);
         try {
-            for (Station s : StationService.getInstance().getAll()) {
+            StationService.getInstance().getAll().forEach(s -> {
                 model.addRow(new Object[]{s.getId(), s.getName()});
-            }
+                return null;
+            });
         } catch (Exception ex) {
             showError(ex);
         }
@@ -330,8 +327,8 @@ public class AdminPanelView {
         btnAdd.addActionListener(e -> {
             try {
                 // Carga los trenes y estaciones disponibles para mostrar en combos
-                List<Train> trenes = TrainService.getInstance().getAll();
-                List<Station> estaciones = StationService.getInstance().getAll();
+                LinkedList<Train> trenes = TrainService.getInstance().getAll();
+                LinkedList<Station> estaciones = StationService.getInstance().getAll();
 
                 if (trenes.isEmpty()) {
                     JOptionPane.showMessageDialog(frame, "No hay trenes registrados.");
@@ -343,16 +340,19 @@ public class AdminPanelView {
                 }
 
                 // Combo de trenes mostrando nombre
-                JComboBox<Train> cmbTren = new JComboBox<>(trenes.toArray(new Train[0]));
+                JComboBox<Train> cmbTren = new JComboBox<>(trenes.toArray());
                 cmbTren.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
                     JLabel lbl = new JLabel(value != null ? value.getId() + " — " + value.getName() : "");
-                    if (isSelected) { lbl.setOpaque(true); lbl.setBackground(list.getSelectionBackground()); }
+                    if (isSelected) {
+                        lbl.setOpaque(true);
+                        lbl.setBackground(list.getSelectionBackground());
+                    }
                     return lbl;
                 });
 
                 // Combos de estaciones
-                JComboBox<Station> cmbOrigen = new JComboBox<>(estaciones.toArray(new Station[0]));
-                JComboBox<Station> cmbDestino = new JComboBox<>(estaciones.toArray(new Station[0]));
+                JComboBox<Station> cmbOrigen = new JComboBox<>(estaciones.toArray());
+                JComboBox<Station> cmbDestino = new JComboBox<>(estaciones.toArray());
                 cmbDestino.setSelectedIndex(1); // para que origen y destino no sean iguales por defecto
 
                 // Renderer para mostrar nombre de estación
@@ -367,20 +367,20 @@ public class AdminPanelView {
                 cmbOrigen.setRenderer(stRenderer);
                 cmbDestino.setRenderer(stRenderer);
 
-                JTextField salida  = new JTextField("2025-06-01 08:00:00");
+                JTextField salida = new JTextField("2025-06-01 08:00:00");
                 JTextField llegada = new JTextField("2025-06-01 12:00:00");
 
                 Object[] fields = {
-                        "Tren:",   cmbTren,
+                        "Tren:", cmbTren,
                         "Origen:", cmbOrigen,
                         "Destino:", cmbDestino,
                         "Fecha Salida (yyyy-MM-dd HH:mm:ss):", salida,
-                        "Fecha Llegada:",                      llegada
+                        "Fecha Llegada:", llegada
                 };
 
                 int r = JOptionPane.showConfirmDialog(frame, fields, "Agregar Ruta", JOptionPane.OK_CANCEL_OPTION);
                 if (r == JOptionPane.OK_OPTION) {
-                    Station origen  = (Station) cmbOrigen.getSelectedItem();
+                    Station origen = (Station) cmbOrigen.getSelectedItem();
                     Station destino = (Station) cmbDestino.getSelectedItem();
 
                     if (origen.getId() == destino.getId()) {
@@ -405,11 +405,14 @@ public class AdminPanelView {
 
         btnEdit.addActionListener(e -> {
             int row = table.getSelectedRow();
-            if (row < 0) { JOptionPane.showMessageDialog(frame, "Selecciona una ruta."); return; }
+            if (row < 0) {
+                JOptionPane.showMessageDialog(frame, "Selecciona una ruta.");
+                return;
+            }
 
             int id = Integer.parseInt(model.getValueAt(row, 0).toString());
             // columna 4 = Fecha Salida, columna 5 = Fecha Llegada
-            JTextField salida  = new JTextField(model.getValueAt(row, 4).toString());
+            JTextField salida = new JTextField(model.getValueAt(row, 4).toString());
             JTextField llegada = new JTextField(model.getValueAt(row, 5).toString());
             Object[] fields = {"Fecha Salida:", salida, "Fecha Llegada:", llegada};
 
@@ -417,10 +420,10 @@ public class AdminPanelView {
             if (r == JOptionPane.OK_OPTION) {
                 try {
                     RouteService.getInstance().update(
-                    model.getValueAt(row, 0).toString(),   // ya es String, no Integer.parseInt
-                    Timestamp.valueOf(salida.getText().trim()),
-                    Timestamp.valueOf(llegada.getText().trim())
-                );
+                            model.getValueAt(row, 0).toString(),   // ya es String, no Integer.parseInt
+                            Timestamp.valueOf(salida.getText().trim()),
+                            Timestamp.valueOf(llegada.getText().trim())
+                    );
                     loadRoutes(model);
                 } catch (Exception ex) {
                     showError(ex);
@@ -439,7 +442,7 @@ public class AdminPanelView {
             if (confirm == JOptionPane.YES_OPTION) {
                 try {
                     RouteService.getInstance().delete(
-                        model.getValueAt(row, 0).toString()    // ya es String
+                            model.getValueAt(row, 0).toString()    // ya es String
                     );
                     loadRoutes(model);
                 } catch (Exception ex) {
@@ -454,15 +457,17 @@ public class AdminPanelView {
     private void loadRoutes(DefaultTableModel model) {
         model.setRowCount(0);
         try {
-            for (Route r : RouteService.getInstance().getAll())
+            RouteService.getInstance().getAll().forEach(r -> {
                 model.addRow(new Object[]{
                         r.getId(),
-                        r.getTrainName(),          // nombre en vez de ID numérico
+                        r.getTrainName(),
                         r.getOriginName(),
                         r.getDestinationName(),
                         r.getDateOfLeaving(),
                         r.getDateOfArrival()
                 });
+                return null; // Function<Route, Void> requiere retornar null
+            });
         } catch (Exception ex) {
             showError(ex);
         }
@@ -496,16 +501,19 @@ public class AdminPanelView {
 
         btnAdd.addActionListener(e -> {
             try {
-                List<Train> trenes = TrainService.getInstance().getAll();
+                LinkedList<Train> trenes = TrainService.getInstance().getAll();
                 if (trenes.isEmpty()) {
                     JOptionPane.showMessageDialog(frame, "No hay trenes registrados.");
                     return;
                 }
 
-                JComboBox<Train> cmbTren = new JComboBox<>(trenes.toArray(new Train[0]));
+                JComboBox<Train> cmbTren = new JComboBox<>(trenes.toArray());
                 cmbTren.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
                     JLabel lbl = new JLabel(value != null ? value.getId() + " — " + value.getName() : "");
-                    if (isSelected) { lbl.setOpaque(true); lbl.setBackground(list.getSelectionBackground()); }
+                    if (isSelected) {
+                        lbl.setOpaque(true);
+                        lbl.setBackground(list.getSelectionBackground());
+                    }
                     return lbl;
                 });
 
@@ -523,9 +531,9 @@ public class AdminPanelView {
                 if (r == JOptionPane.OK_OPTION) {
                     Train trenSel = (Train) cmbTren.getSelectedItem();
                     WagonService.getInstance().create(
-                        Integer.parseInt(trenSel.getId()),
-                        (String) tipo.getSelectedItem(),
-                        Integer.parseInt(capacidad.getText().trim())
+                            Integer.parseInt(trenSel.getId()),
+                            (String) tipo.getSelectedItem(),
+                            Integer.parseInt(capacidad.getText().trim())
                     );
                     loadWagons(model);
                 }
@@ -533,7 +541,7 @@ public class AdminPanelView {
                 showError(ex);
             }
         });
-        
+
         btnEdit.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row < 0) {
@@ -630,7 +638,7 @@ public class AdminPanelView {
             tipoId.setSelectedItem(model.getValueAt(row, 3).toString());
             JTextField direccion = new JTextField(model.getValueAt(row, 4).toString());
             Object[] fields = {"Nombres:", nombres, "Apellidos:", apellidos,
-                "Tipo ID:", tipoId, "Dirección:", direccion};
+                    "Tipo ID:", tipoId, "Dirección:", direccion};
             int r = JOptionPane.showConfirmDialog(frame, fields, "Editar Pasajero", JOptionPane.OK_CANCEL_OPTION);
             if (r == JOptionPane.OK_OPTION) {
                 try {
@@ -670,15 +678,15 @@ public class AdminPanelView {
     private void loadPassengers(DefaultTableModel model) {
         model.setRowCount(0);
         try {
-            for (Passenger p : UserService.getInstance().getAllPassengers()) {
+            UserService.getInstance().getAllPassengers().forEach(p -> {
+                String[] parts = p.getFullName().split(" ", 2);
                 model.addRow(new Object[]{
-                    p.getIdentificacion(),
-                    p.getFullName().split(" ", 2)[0],
-                    p.getFullName().split(" ", 2).length > 1 ? p.getFullName().split(" ", 2)[1] : "",
-                    p.getIdentificationType(),
-                    p.getAddress()
+                        p.getIdentificacion(), parts[0],
+                        parts.length > 1 ? parts[1] : "",
+                        p.getIdentificationType(), p.getAddress()
                 });
-            }
+                return null;
+            });
         } catch (Exception ex) {
             showError(ex);
         }
@@ -717,7 +725,7 @@ public class AdminPanelView {
             JComboBox<String> tipoId = new JComboBox<>(new String[]{"CC", "TI", "CE"});
             JPasswordField pass = new JPasswordField();
             Object[] fields = {"Identificación:", id, "Nombres:", nombres,
-                "Apellidos:", apellidos, "Tipo ID:", tipoId, "Contraseña:", pass};
+                    "Apellidos:", apellidos, "Tipo ID:", tipoId, "Contraseña:", pass};
             int r = JOptionPane.showConfirmDialog(frame, fields, "Agregar Empleado", JOptionPane.OK_CANCEL_OPTION);
             if (r == JOptionPane.OK_OPTION && !id.getText().trim().isEmpty()) {
                 try {
@@ -779,17 +787,18 @@ public class AdminPanelView {
         return buildTabPanel(table, buttons);
     }
 
-    private void loadEmployees(DefaultTableModel model) {
+    private void loadEmployees(DefaultTableModel model) {  // solo en AdminPanelView
         model.setRowCount(0);
         try {
-            for (Employee emp : UserService.getInstance().getAllEmployees()) {
+            UserService.getInstance().getAllEmployees().forEach(emp -> {
+                String[] parts = emp.getFullName().split(" ", 2);
                 model.addRow(new Object[]{
-                    emp.getIdentificacion(),
-                    emp.getFullName().split(" ", 2)[0],
-                    emp.getFullName().split(" ", 2).length > 1 ? emp.getFullName().split(" ", 2)[1] : "",
-                    emp.getIdentificationType()
+                        emp.getIdentificacion(), parts[0],
+                        parts.length > 1 ? parts[1] : "",
+                        emp.getIdentificationType()
                 });
-            }
+                return null;
+            });
         } catch (Exception ex) {
             showError(ex);
         }
@@ -815,11 +824,11 @@ public class AdminPanelView {
         JPasswordField confirmPass = new JPasswordField(admin.getPassword());
 
         Object[] fields = {
-            "Nombres:", nombres,
-            "Apellidos:", apellidos,
-            "Tipo ID:", tipoId,
-            "Nueva contraseña:", pass,
-            "Confirmar contraseña:", confirmPass
+                "Nombres:", nombres,
+                "Apellidos:", apellidos,
+                "Tipo ID:", tipoId,
+                "Nueva contraseña:", pass,
+                "Confirmar contraseña:", confirmPass
         };
 
         int r = JOptionPane.showConfirmDialog(frame, fields, "Editar mi perfil", JOptionPane.OK_CANCEL_OPTION);
@@ -872,5 +881,24 @@ public class AdminPanelView {
 
     private void showError(Exception ex) {
         JOptionPane.showMessageDialog(frame, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    {
+// GUI initializer generated by IntelliJ IDEA GUI Designer
+// >>> IMPORTANT!! <<<
+// DO NOT EDIT OR ADD ANY CODE HERE!
+        $$$setupUI$$$();
+    }
+
+    /**
+     * Method generated by IntelliJ IDEA GUI Designer
+     * >>> IMPORTANT!! <<<
+     * DO NOT edit this method OR call it in your code!
+     *
+     * @noinspection ALL
+     */
+    private void $$$setupUI$$$() {
+        final JPanel panel1 = new JPanel();
+        panel1.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
     }
 }
