@@ -14,4 +14,5 @@ public interface UserInterface extends Remote {
     LinkedList<Employee> getAllEmployees()                                                       throws RemoteException, Exception;
     boolean updateEmployee(String id, String nombres, String apellidos, String tipoId)          throws RemoteException, Exception;
     boolean updateAdmin(String id, String nombres, String apellidos, String tipoId, String pass) throws RemoteException, Exception;
+    Passenger loginPassenger(String identificacion, String password) throws RemoteException, Exception;
 }

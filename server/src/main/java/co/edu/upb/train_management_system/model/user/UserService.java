@@ -125,4 +125,29 @@ public class UserService extends UnicastRemoteObject implements UserInterface {
         stmt.executeUpdate();
         return true;
     }
+
+    @Override
+    public Passenger loginPassenger(String identificacion, String password) throws Exception {
+        try {
+            Connection conn = DatabaseConnection.getConnection();
+            String sql = "SELECT * FROM usuario WHERE identificacion=? AND contrasena=? AND tipo='PASAJERO'";
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, identificacion);
+            stmt.setString(2, password);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new Passenger(
+                        rs.getString("identificacion"),
+                        rs.getString("nombres"),
+                        rs.getString("apellidos"),
+                        rs.getString("tipo_identificacion"),
+                        rs.getString("direccion") != null ? rs.getString("direccion") : "",
+                        rs.getString("contrasena")
+                );
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new RemoteException("Error en BD: " + e.getMessage());
+        }
+    }
 }

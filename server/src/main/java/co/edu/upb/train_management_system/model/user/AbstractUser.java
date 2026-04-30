@@ -2,13 +2,20 @@ package co.edu.upb.train_management_system.model.user;
 
 import co.edu.upb.app.LinkedList.singly.LinkedList;
 
-public abstract class AbstractUser{
+import java.io.Serializable;
+
+public abstract class AbstractUser implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String identificacion;
     private String names;
     private String lastNames;
     private String identificationType;
     protected String password;
     private LinkedList<String> cellPhones;
+
+    protected AbstractUser() {
+        this.cellPhones = new LinkedList<>();
+    }
 
     public AbstractUser(String identificacion, String names, String lastNames, String identificationType) {
         this.identificacion = identificacion;

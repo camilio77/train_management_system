@@ -13,6 +13,13 @@ public class Passenger extends AbstractUser implements Serializable {
     private Ticket currentTicket;
     private LinkedList<EmergencyContact> emergencyContacts;
 
+    public Passenger() {
+        super("", "", "", "");
+        this.address = "";
+        this.previousTickets = new LinkedList<>();
+        this.emergencyContacts = new LinkedList<>();
+    }
+
     public Passenger(String identificacion, String names, String lastNames, String identificationType, String address, String password) {
         super(identificacion, names, lastNames, identificationType);
         this.address = address;
