@@ -7,6 +7,7 @@ import co.edu.upb.train_management_system.model.ticket.Ticket;
 
 public class Passenger extends AbstractUser implements Serializable {
     private static final long serialVersionUID = 1L;
+
     private String address;
     private LinkedList<Ticket> previousTickets;
     private Ticket currentTicket;

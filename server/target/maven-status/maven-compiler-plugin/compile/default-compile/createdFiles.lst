@@ -36,12 +36,15 @@ co\edu\upb\train_management_system\model\user\UserInterface.class
 co\edu\upb\train_management_system\model\observer\Subject.class
 co\edu\upb\train_management_system\model\station\StationService.class
 co\edu\upb\train_management_system\model\wagon\WagonService.class
+co\edu\upb\train_management_system\model\route\RouteInterface.class
 co\edu\upb\train_management_system\view\AdminPanelView$1.class
 co\edu\upb\train_management_system\view\LoginView.class
+co\edu\upb\train_management_system\model\train\TrainInterface.class
 co\edu\upb\train_management_system\model\observer\Observable.class
 co\edu\upb\train_management_system\model\ticket\TicketService.class
 co\edu\upb\train_management_system\model\user\Admin.class
 co\edu\upb\train_management_system\view\EmployeePanelView$1.class
+co\edu\upb\train_management_system\model\station\StationInterface.class
 co\edu\upb\train_management_system\model\ticket\Ticket.class
 co\edu\upb\train_management_system\model\history\History.class
 co\edu\upb\train_management_system\model\route\RouteService.class

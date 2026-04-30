@@ -2,21 +2,24 @@ package co.edu.upb.train_management_system.model.train;
 
 import co.edu.upb.app.LinkedList.singly.LinkedList;
 import co.edu.upb.train_management_system.DataBase.DatabaseConnection;
-
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.sql.*;
 
-public class TrainService {
+public class TrainService extends UnicastRemoteObject implements TrainInterface {
     private static TrainService instance;
-    private TrainService() {}
-    public static TrainService getInstance() {
+
+    protected TrainService() throws RemoteException { super(); }
+
+    public static TrainService getInstance() throws RemoteException {
         if (instance == null) instance = new TrainService();
         return instance;
     }
 
+    @Override
     public LinkedList<Train> getAll() throws SQLException {
         LinkedList<Train> list = new LinkedList<>();
-        String sql = "SELECT * FROM tren";
-        ResultSet rs = DatabaseConnection.getConnection().createStatement().executeQuery(sql);
+        ResultSet rs = DatabaseConnection.getConnection().createStatement().executeQuery("SELECT * FROM tren");
         while (rs.next()) {
             Train t = new Train(String.valueOf(rs.getInt("id_tren")), rs.getString("nombre"));
             t.setType(rs.getString("tipo"));
@@ -26,27 +29,24 @@ public class TrainService {
         return list;
     }
 
+    @Override
     public void create(String nombre, String tipo) throws SQLException {
-        String sql = "INSERT INTO tren (nombre, tipo) VALUES (?, ?)";
-        PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(sql);
-        stmt.setString(1, nombre);
-        stmt.setString(2, tipo);
+        PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement("INSERT INTO tren (nombre, tipo) VALUES (?, ?)");
+        stmt.setString(1, nombre); stmt.setString(2, tipo);
         stmt.executeUpdate();
     }
 
+    @Override
     public void update(int id, String nombre, String tipo, int kilometraje) throws SQLException {
-        String sql = "UPDATE tren SET nombre=?, tipo=?, kilometraje=? WHERE id_tren=?";
-        PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(sql);
-        stmt.setString(1, nombre);
-        stmt.setString(2, tipo);
-        stmt.setInt(3, kilometraje);
-        stmt.setInt(4, id);
+        PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement("UPDATE tren SET nombre=?, tipo=?, kilometraje=? WHERE id_tren=?");
+        stmt.setString(1, nombre); stmt.setString(2, tipo);
+        stmt.setInt(3, kilometraje); stmt.setInt(4, id);
         stmt.executeUpdate();
     }
 
+    @Override
     public void delete(int id) throws SQLException {
-        String sql = "DELETE FROM tren WHERE id_tren=?";
-        PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(sql);
+        PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement("DELETE FROM tren WHERE id_tren=?");
         stmt.setInt(1, id);
         stmt.executeUpdate();
     }

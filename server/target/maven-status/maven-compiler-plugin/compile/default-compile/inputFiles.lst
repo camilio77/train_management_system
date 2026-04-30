@@ -12,12 +12,14 @@ C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_manage
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\wagon\Wagon.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\train\Train.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\history\Action.java
+C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\train\TrainInterface.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\observer\Observable.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\user\Employee.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\ticket\Ticket.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\user\UserService.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\observer\Subject.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\view\RegisterView.java
+C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\station\StationInterface.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\view\LoginView.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\user\Passenger.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\wagon\WagonInterface.java
@@ -31,6 +33,7 @@ C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_manage
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\wagon\LuggageWagon.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\enviroment\Environment.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\luggage\Luggage.java
+C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\model\route\RouteInterface.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\view\AdminPanelView.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\view\ServerView.java
 C:\Users\camil\Downloads\proyecto integrador lenin 3r semestre tren\train_management_system\server\src\main\java\co\edu\upb\train_management_system\factory\ServerFactory.java

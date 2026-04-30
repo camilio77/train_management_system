@@ -1,0 +1,8 @@
+co\edu\upb\client\enviroment\Environment.class
+co\edu\upb\client\factory\ClientFactory.class
+co\edu\upb\client\controller\ClientController.class
+co\edu\upb\train_management_system\view\RegisterView.class
+co\edu\upb\client\view\ClientView.class
+co\edu\upb\client\model\ClientModel.class
+co\edu\upb\client\App.class
+co\edu\upb\train_management_system\view\LoginView.class

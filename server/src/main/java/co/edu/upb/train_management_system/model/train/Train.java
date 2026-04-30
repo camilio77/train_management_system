@@ -9,6 +9,7 @@ import co.edu.upb.train_management_system.model.wagon.Wagon;
 
 public class Train implements Serializable {
     private static final long serialVersionUID = 1L;
+
     private String id;
     private String name;
     private String type;

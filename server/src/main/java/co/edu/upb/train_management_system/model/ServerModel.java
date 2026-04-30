@@ -1,38 +1,78 @@
 package co.edu.upb.train_management_system.model;
 
 import java.rmi.Naming;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-import co.edu.upb.train_management_system.model.ticket.TicketInterface;
+import co.edu.upb.train_management_system.model.route.RouteService;
+import co.edu.upb.train_management_system.model.station.StationService;
 import co.edu.upb.train_management_system.model.ticket.TicketService;
+import co.edu.upb.train_management_system.model.train.TrainService;
+import co.edu.upb.train_management_system.model.user.UserService;
+import co.edu.upb.train_management_system.model.wagon.WagonService;
 
 public class ServerModel {
 
-  private String ip;
-  private int port;
-  private String serviceName;
-  private String uri;
-  private Registry registry;      // ← guardar referencia al registry
-  private TicketInterface service; // ← guardar referencia al servicio
+  private final String ip;
+  private final int port;
+  private final String serviceName;
+
+  private final String ticketUri;
+  private final String userUri;
+  private final String trainUri;
+  private final String routeUri;
+  private final String wagonUri;
+  private final String stationUri;
+
+  private TicketService ticketService;
+  private UserService   userService;
+  private TrainService  trainService;
+  private RouteService  routeService;
+  private WagonService  wagonService;
+  private StationService stationService;
+
+  private Registry registry;
 
   public ServerModel(String ip, int port, String serviceName) {
-    this.ip = ip;
-    this.port = port;
+    this.ip          = ip;
+    this.port        = port;
     this.serviceName = serviceName;
-    this.uri = "//" + ip + ":" + port + "/" + this.serviceName;
-    System.out.println("URI: " + this.uri);
+
+    String base = "//" + ip + ":" + port + "/" + serviceName;
+    this.ticketUri = base;
+    this.userUri   = base + "-users";
+    this.trainUri  = base + "-trains";
+    this.routeUri  = base + "-routes";
+    this.wagonUri  = base + "-wagons";
+    this.stationUri  = base + "-stations";
+
+    System.out.println("Base URI: " + base);
   }
 
   public boolean deploy() {
     try {
       System.setProperty("java.rmi.server.hostname", ip);
-      service = new TicketService();
+
+      ticketService = new TicketService();
+      userService   = UserService.getInstance();
+      trainService  = TrainService.getInstance();
+      routeService  = RouteService.getInstance();
+      wagonService  = WagonService.getInstance();
+      stationService = StationService.getInstance();
+
       registry = LocateRegistry.createRegistry(port);
-      Naming.rebind(uri, service);
+
+      Naming.rebind(ticketUri, ticketService);
+      Naming.rebind(userUri,   userService);
+      Naming.rebind(trainUri,  trainService);
+      Naming.rebind(routeUri,  routeService);
+      Naming.rebind(wagonUri,  wagonService);
+      Naming.rebind(stationUri, stationService);
+
+      System.out.println("✔ Todos los servicios registrados en el puerto " + port);
       return true;
+
     } catch (Exception e) {
       e.printStackTrace();
       return false;
@@ -41,16 +81,32 @@ public class ServerModel {
 
   public boolean stop() {
     try {
-      // Des-registra el servicio del registry
-      Naming.unbind(uri);
-      // Desexporta el objeto remoto
-      UnicastRemoteObject.unexportObject(service, true);
-      // Destruye el registry
+      Naming.unbind(ticketUri);
+      Naming.unbind(userUri);
+      Naming.unbind(trainUri);
+      Naming.unbind(routeUri);
+      Naming.unbind(wagonUri);
+      Naming.unbind(stationUri);
+
+      UnicastRemoteObject.unexportObject(ticketService, true);
+      UnicastRemoteObject.unexportObject(userService,   true);
+      UnicastRemoteObject.unexportObject(trainService,  true);
+      UnicastRemoteObject.unexportObject(routeService,  true);
+      UnicastRemoteObject.unexportObject(wagonService,  true);
+      UnicastRemoteObject.unexportObject(stationService,  true);
+
       UnicastRemoteObject.unexportObject(registry, true);
+
+      System.out.println("Servidor detenido correctamente.");
       return true;
+
     } catch (Exception e) {
       e.printStackTrace();
       return false;
     }
   }
+
+  public String getIp()          { return ip; }
+  public int    getPort()        { return port; }
+  public String getServiceName() { return serviceName; }
 }

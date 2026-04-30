@@ -2,7 +2,7 @@ package co.edu.upb.train_management_system.model.user;
 
 import co.edu.upb.app.LinkedList.singly.LinkedList;
 
-public abstract class AbstractUser implements UserInterface{
+public abstract class AbstractUser{
     private String identificacion;
     private String names;
     private String lastNames;

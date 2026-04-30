@@ -1,11 +1,14 @@
 package co.edu.upb.train_management_system.model.route;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import co.edu.upb.train_management_system.model.station.Station;
 import co.edu.upb.train_management_system.model.train.Train;
 
-public class Route {
+public class Route implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String id;
     private Date dateOfLeaving;
     private Date dateOfArrival;

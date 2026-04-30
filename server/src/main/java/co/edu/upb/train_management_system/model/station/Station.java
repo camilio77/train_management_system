@@ -1,6 +1,10 @@
 package co.edu.upb.train_management_system.model.station;
 
-public class Station {
+import java.io.Serializable;
+
+public class Station implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String id;
     private String name;
 
