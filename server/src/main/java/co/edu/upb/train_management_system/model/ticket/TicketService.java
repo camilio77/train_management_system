@@ -312,4 +312,41 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
 
     return ticket;
   }
+
+  @Override
+  public LinkedList<Ticket> getTicketsByRoute(String idRuta) throws RemoteException {
+    try {
+      LinkedList<Ticket> list = new LinkedList<>();
+      Connection conn = DatabaseConnection.getConnection();
+      PreparedStatement stmt = conn.prepareStatement(
+              "SELECT id_tiquete FROM tiquete WHERE id_ruta = ? ORDER BY fecha_compra DESC");
+      stmt.setInt(1, Integer.parseInt(idRuta));
+      ResultSet rs = stmt.executeQuery();
+      while (rs.next())
+        list.add(buildTicket(conn, rs.getInt(1)));
+      return list;
+    } catch (Exception e) {
+      throw new RemoteException("Error obteniendo tickets por ruta: " + e.getMessage());
+    }
+  }
+
+  @Override
+  public boolean validateTicket(int idTicket, int idRuta) throws RemoteException {
+    try {
+      Connection conn = DatabaseConnection.getConnection();
+      PreparedStatement stmt = conn.prepareStatement(
+              """
+              SELECT 1 FROM tiquete
+              WHERE id_tiquete = ?
+                AND id_ruta    = ?
+                AND estado     = true
+              """);
+      stmt.setInt(1, idTicket);
+      stmt.setInt(2, idRuta);
+      ResultSet rs = stmt.executeQuery();
+      return rs.next();   // true si existe y está activo
+    } catch (Exception e) {
+      throw new RemoteException("Error validando ticket: " + e.getMessage());
+    }
+  }
 }
