@@ -72,6 +72,7 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
 
       try {
         boolean primerTramo = true;
+        ensureGuestUser(conn, idUsuario, idUsuario);
         for (int idRuta : idRutas) {
           int idVagon = findAvailableWagon(conn, idRuta);
           if (idVagon < 0) {
@@ -139,6 +140,19 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
     } catch (Exception e) {
       throw new RemoteException("Error en compra: " + e.getMessage());
     }
+  }
+
+  @Override
+  public LinkedList<Ticket> buyTicketsAsGuest(String idUsuario, String nombreCompleto,
+      String estacionOrigen, String estacionDestino,
+      String categoria, double pesoEquipaje) throws RemoteException {
+    try {
+      Connection connCheck = DatabaseConnection.getConnection();
+      ensureGuestUser(connCheck, idUsuario, nombreCompleto);
+    } catch (SQLException e) {
+      throw new RemoteException("Error registrando usuario invitado: " + e.getMessage());
+    }
+    return buyTickets(idUsuario, estacionOrigen, estacionDestino, categoria, pesoEquipaje);
   }
 
   @Override
@@ -284,7 +298,6 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
     ticket.setStatus(rs.getBoolean("estado"));
     ticket.setNumeroAsiento(rs.getInt("numero_asiento"));
 
-    // Agregar la ruta a la queue del ticket
     Route route = new Route(
         String.valueOf(rs.getInt("id_ruta")),
         rs.getTimestamp("fecha_salida"),
@@ -319,7 +332,7 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
       LinkedList<Ticket> list = new LinkedList<>();
       Connection conn = DatabaseConnection.getConnection();
       PreparedStatement stmt = conn.prepareStatement(
-              "SELECT id_tiquete FROM tiquete WHERE id_ruta = ? ORDER BY fecha_compra DESC");
+          "SELECT id_tiquete FROM tiquete WHERE id_ruta = ? ORDER BY fecha_compra DESC");
       stmt.setInt(1, Integer.parseInt(idRuta));
       ResultSet rs = stmt.executeQuery();
       while (rs.next())
@@ -335,7 +348,7 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
     try {
       Connection conn = DatabaseConnection.getConnection();
       PreparedStatement stmt = conn.prepareStatement(
-              """
+          """
               SELECT 1 FROM tiquete
               WHERE id_tiquete = ?
                 AND id_ruta    = ?
@@ -344,7 +357,7 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
       stmt.setInt(1, idTicket);
       stmt.setInt(2, idRuta);
       ResultSet rs = stmt.executeQuery();
-      return rs.next();   // true si existe y está activo
+      return rs.next();
     } catch (Exception e) {
       throw new RemoteException("Error validando ticket: " + e.getMessage());
     }
@@ -355,19 +368,17 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
     try {
       Connection conn = DatabaseConnection.getConnection();
 
-      // Traemos tickets activos de la ruta, ordenados por prioridad de categoría
-      // y número de asiento dentro de cada categoría
       PreparedStatement stmt = conn.prepareStatement("""
-            SELECT id_tiquete FROM tiquete
-            WHERE id_ruta = ? AND estado = true
-            ORDER BY
-                CASE categoria
-                    WHEN 'PREMIUM'   THEN 1
-                    WHEN 'EJECUTIVA' THEN 2
-                    ELSE                  3
-                END,
-                numero_asiento ASC
-            """);
+          SELECT id_tiquete FROM tiquete
+          WHERE id_ruta = ? AND estado = true
+          ORDER BY
+              CASE categoria
+                  WHEN 'PREMIUM'   THEN 1
+                  WHEN 'EJECUTIVA' THEN 2
+                  ELSE                  3
+              END,
+              numero_asiento ASC
+          """);
       stmt.setInt(1, Integer.parseInt(idRuta));
       ResultSet rs = stmt.executeQuery();
 
@@ -379,5 +390,30 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
     } catch (Exception e) {
       throw new RemoteException("Error obteniendo orden de abordaje: " + e.getMessage());
     }
+  }
+
+  private void ensureGuestUser(Connection conn, String idUsuario, String nombreCompleto)
+      throws SQLException {
+    PreparedStatement check = conn.prepareStatement(
+        "SELECT 1 FROM usuario WHERE identificacion = ?");
+    check.setString(1, idUsuario);
+    ResultSet rs = check.executeQuery();
+    if (rs.next())
+      return;
+
+    String[] partes = nombreCompleto.trim().split(" ", 2);
+    String nombres = partes[0];
+    String apellidos = partes.length > 1 ? partes[1] : "-";
+
+    PreparedStatement insert = conn.prepareStatement("""
+        INSERT INTO usuario
+          (identificacion, nombres, apellidos, contrasena,
+           tipo, tipo_identificacion)
+        VALUES (?, ?, ?, 'INVITADO', 'PASAJERO', 'CC')
+        """);
+    insert.setString(1, idUsuario);
+    insert.setString(2, nombres);
+    insert.setString(3, apellidos);
+    insert.executeUpdate();
   }
 }
