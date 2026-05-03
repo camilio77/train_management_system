@@ -35,7 +35,13 @@ To run the system you need to first clone the project with the following command
 ```
 git clone https://github.com/camilio77/train_management_system.git
 cd train_management_system
-code .
 ```
 
-Then in your IDE you need to go to the maven dependency, javaFx and then you execute run.
+Then you start the server by using this command:
+
+```
+cd server
+mvn clean compile exec:java
+```
+
+And you can use any other client by executing the command `mvn clean compile exec:java` on every client you want to execute.
