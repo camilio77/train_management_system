@@ -9,6 +9,7 @@ import co.edu.upb.train_management_system.model.wagon.Wagon;
 
 public class Train implements Serializable {
     private static final long serialVersionUID = 1L;
+
     private String id;
     private String name;
     private String type;
@@ -55,7 +56,7 @@ public class Train implements Serializable {
     }
 
     public int getCapacity() {
-        int[] capacity = {0};
+        int[] capacity = { 0 };
         wagons.forEach(wagon -> {
             if (wagon instanceof PassengerWagon) {
                 capacity[0] += ((PassengerWagon) wagon).getPassengerCount();
@@ -76,7 +77,7 @@ public class Train implements Serializable {
         return stack;
     }
 
-    public String getType(){
+    public String getType() {
         return type;
     }
 

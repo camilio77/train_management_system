@@ -1,0 +1,8 @@
+co\edu\upb\ticketMachine\controller\TicketMachineController.class
+co\edu\upb\ticketMachine\factory\TicketMachineFactory.class
+co\edu\upb\ticketMachine\App.class
+co\edu\upb\ticketMachine\view\UserDataView.class
+co\edu\upb\ticketMachine\enviroment\Environment.class
+co\edu\upb\ticketMachine\controller\UserDataController.class
+co\edu\upb\ticketMachine\model\TicketMachineModel.class
+co\edu\upb\ticketMachine\view\TicketMachineView.class

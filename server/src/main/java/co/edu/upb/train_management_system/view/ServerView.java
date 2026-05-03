@@ -1,74 +1,111 @@
 package co.edu.upb.train_management_system.view;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.util.function.UnaryOperator;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 
 import co.edu.upb.train_management_system.model.history.History;
 import co.edu.upb.train_management_system.model.observer.Observer;
 import co.edu.upb.train_management_system.model.observer.Subject;
 
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
-
 public class ServerView extends Observer {
-    private JPanel mainPanel;
+
     private JButton button;
-    private JPanel panelButton;
-    private JPanel panelConsole;
-    private JLabel console;
     private JButton stopButton;
     private JButton testButton;
-
-    private String title;
+    private JLabel console;
+    private JPanel mainPanel;
+    private JPanel panelButton;
     private JFrame frame;
+    private String title;
 
     public ServerView(String title, Subject subject) {
         super(subject);
         this.title = title;
-        // No inicializas los componentes aquí, el .form ya lo hace
+        buildComponents();
+    }
+
+    private void buildComponents() {
+        // Panel consola
+        JPanel panelConsole = new JPanel(new BorderLayout());
+        panelConsole.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        console = new JLabel("Estado: esperando...", SwingConstants.LEFT);
+        console.setOpaque(true);
+        console.setBackground(Color.WHITE);
+        console.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        console.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(180, 180, 180)),
+                BorderFactory.createEmptyBorder(6, 8, 6, 8)));
+        panelConsole.add(console, BorderLayout.CENTER);
+
+        // Panel botones
+        panelButton = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 8));
+
+        button = new JButton("▶ Iniciar Servidor");
+        button.setBackground(new Color(34, 139, 80));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+
+        stopButton = new JButton("⏹ Detener");
+        stopButton.setBackground(new Color(200, 50, 50));
+        stopButton.setForeground(Color.WHITE);
+        stopButton.setFocusPainted(false);
+        stopButton.setEnabled(false);
+
+        panelButton.add(button);
+        panelButton.add(stopButton);
+
+        mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(panelConsole, BorderLayout.CENTER);
+        mainPanel.add(panelButton, BorderLayout.SOUTH);
     }
 
     public void initComponents(UnaryOperator<Void> onStart, UnaryOperator<Void> onStop) {
-        console.setOpaque(true);
-        console.setBackground(new Color(255, 255, 255));
+        if (GraphicsEnvironment.isHeadless())
+            return;
 
-        if (GraphicsEnvironment.isHeadless()) return;
+        if (frame == null) {
+            frame = new JFrame(title);
+            frame.setContentPane(mainPanel);
+            frame.setSize(600, 250);
+            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            frame.setResizable(false);
+            frame.setLocationRelativeTo(null);
+        }
 
-        if (frame == null) frame = new JFrame(title);
-
-        frame.setContentPane(mainPanel);
-        frame.setSize(600, 250);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setResizable(false);
-        frame.setLocationRelativeTo(null);
-
-        // Botón start
-        button.addActionListener(event -> onStart.apply(null));
-
-        // Botón stop — agrégalo en el .form con field name "stopButton"
-        stopButton.setEnabled(false);
-        stopButton.addActionListener(event -> onStop.apply(null));
+        button.addActionListener(e -> onStart.apply(null));
+        stopButton.addActionListener(e -> onStop.apply(null));
 
         frame.setVisible(true);
     }
 
     public void startStatus(String status) {
-        button.setText(status);
         button.setEnabled(false);
-        stopButton.setEnabled(true); // ← habilita el stop
-        this.getHistory().addAction(status);
+        stopButton.setEnabled(true);
+        getHistory().addAction(status);
     }
 
     public void stopStatus(String status) {
-        button.setText(status);
-        button.setEnabled(true);   // ← vuelve a habilitar start
+        button.setEnabled(true);
         stopButton.setEnabled(false);
-        this.getHistory().addAction(status);
+        getHistory().addAction(status);
     }
 
     public void showTestButton() {
         if (testButton == null) {
-            testButton = new JButton("Prueba");
+            testButton = new JButton("🧪 Prueba Login");
             testButton.addActionListener(e -> new LoginView());
             panelButton.add(testButton);
             panelButton.revalidate();
@@ -78,7 +115,7 @@ public class ServerView extends Observer {
 
     @Override
     public void update() {
-        console.setText("Status: " + this.getHistory().getLastAction());
+        console.setText("  Status: " + getHistory().getLastAction());
     }
 
     public History getHistory() {
@@ -86,65 +123,6 @@ public class ServerView extends Observer {
     }
 
     public void setMessage(String msg) {
-        this.getHistory().addAction(msg);
-    }
-
-    {
-// GUI initializer generated by IntelliJ IDEA GUI Designer
-// >>> IMPORTANT!! <<<
-// DO NOT EDIT OR ADD ANY CODE HERE!
-        $$$setupUI$$$();
-    }
-
-    /**
-     * Method generated by IntelliJ IDEA GUI Designer
-     * >>> IMPORTANT!! <<<
-     * DO NOT edit this method OR call it in your code!
-     *
-     * @noinspection ALL
-     */
-    private void $$$setupUI$$$() {
-        mainPanel = new JPanel();
-        mainPanel.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(10, 10, 10, 10), -1, -1));
-        mainPanel.setMinimumSize(new Dimension(600, 200));
-        mainPanel.setPreferredSize(new Dimension(600, 200));
-        final JPanel panel1 = new JPanel();
-        panel1.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, 8));
-        mainPanel.add(panel1, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        panelButton = new JPanel();
-        panelButton.setLayout(new GridBagLayout());
-        panel1.add(panelButton, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, 1, null, null, null, 0, false));
-        button = new JButton();
-        button.setText("Start Server");
-        GridBagConstraints gbc;
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 0.5;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panelButton.add(button, gbc);
-        stopButton = new JButton();
-        stopButton.setText("Stop Server");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.weightx = 0.5;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panelButton.add(stopButton, gbc);
-        panelConsole = new JPanel();
-        panelConsole.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(5, 10, 5, 10), -1, -1));
-        panel1.add(panelConsole, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        panelConsole.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
-        console = new JLabel();
-        console.setText("Status: Stopped.");
-        console.setVerticalAlignment(1);
-        panelConsole.add(console, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_WEST, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 5, false));
-    }
-
-    /**
-     * @noinspection ALL
-     */
-    public JComponent $$$getRootComponent$$$() {
-        return mainPanel;
+        getHistory().addAction(msg);
     }
 }

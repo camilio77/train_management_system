@@ -1,18 +1,20 @@
 package co.edu.upb.train_management_system.model.wagon;
 
-public class Wagon implements WagonInterface {
+import java.io.Serializable;
+
+public class Wagon implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String id;
 
     public Wagon(String id) {
         this.id = id;
     }
 
-    @Override
     public String getId() {
         return id;
     }
 
-    @Override
     public void setId(String id) {
         this.id = id;
     }

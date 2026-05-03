@@ -1,0 +1,10 @@
+co\edu\upb\boardingScreen\controller\BoardingController.class
+co\edu\upb\boardingScreen\App.class
+co\edu\upb\boardingScreen\controller\BoardingLoginController.class
+co\edu\upb\boardingScreen\view\BoardingView$1.class
+co\edu\upb\boardingScreen\factory\BoardingFactory.class
+co\edu\upb\boardingScreen\model\BoardingModel.class
+co\edu\upb\boardingScreen\view\BoardingView$2.class
+co\edu\upb\boardingScreen\enviroment\Environment.class
+co\edu\upb\boardingScreen\view\BoardingLoginView.class
+co\edu\upb\boardingScreen\view\BoardingView.class

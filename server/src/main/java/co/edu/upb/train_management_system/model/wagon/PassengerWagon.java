@@ -19,7 +19,7 @@ public class PassengerWagon extends Wagon implements Serializable {
     }
 
     public boolean loadPassenger(Passenger passenger) {
-       throw new IllegalStateException("Not done yet.");
+        throw new IllegalStateException("Not done yet.");
     }
 
     public Passenger unloadPassenger() {

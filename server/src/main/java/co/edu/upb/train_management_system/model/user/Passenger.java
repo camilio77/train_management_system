@@ -7,12 +7,21 @@ import co.edu.upb.train_management_system.model.ticket.Ticket;
 
 public class Passenger extends AbstractUser implements Serializable {
     private static final long serialVersionUID = 1L;
+
     private String address;
     private LinkedList<Ticket> previousTickets;
     private Ticket currentTicket;
     private LinkedList<EmergencyContact> emergencyContacts;
 
-    public Passenger(String identificacion, String names, String lastNames, String identificationType, String address, String password) {
+    public Passenger() {
+        super("", "", "", "");
+        this.address = "";
+        this.previousTickets = new LinkedList<>();
+        this.emergencyContacts = new LinkedList<>();
+    }
+
+    public Passenger(String identificacion, String names, String lastNames, String identificationType, String address,
+            String password) {
         super(identificacion, names, lastNames, identificationType);
         this.address = address;
         setPassword(password);
@@ -47,13 +56,13 @@ public class Passenger extends AbstractUser implements Serializable {
         return emergencyContacts.toArray();
     }
 
-    public boolean addEmergencyContact(EmergencyContact emergencyContact){
+    public boolean addEmergencyContact(EmergencyContact emergencyContact) {
         return emergencyContacts.add(emergencyContact);
     }
 
-    public boolean deleteEmergencyContact(String idContact){
+    public boolean deleteEmergencyContact(String idContact) {
         emergencyContacts.forEach(e -> {
-            if (e.getIdentificacion() == idContact){
+            if (e.getIdentificacion() == idContact) {
                 emergencyContacts.remove(e);
             }
             return null;
@@ -61,9 +70,9 @@ public class Passenger extends AbstractUser implements Serializable {
         return true;
     }
 
-    public boolean modifyEmergencyContact(String idContact, EmergencyContact newContact){
+    public boolean modifyEmergencyContact(String idContact, EmergencyContact newContact) {
         emergencyContacts.forEach(e -> {
-            if (e.getIdentificacion() == idContact){
+            if (e.getIdentificacion() == idContact) {
                 emergencyContacts.replace(e, newContact, t -> t.getIdentificacion() == idContact);
             }
             return null;
@@ -71,7 +80,7 @@ public class Passenger extends AbstractUser implements Serializable {
         return true;
     }
 
-    public boolean addCurrentTicketToPrevious(){
+    public boolean addCurrentTicketToPrevious() {
         previousTickets.add(currentTicket);
         currentTicket = null;
         return true;
