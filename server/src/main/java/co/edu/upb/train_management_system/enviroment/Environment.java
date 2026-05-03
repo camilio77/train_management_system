@@ -49,7 +49,6 @@ public class Environment {
                     "server" + File.separator +
                     "config.properties");
 
-            // Si no existe en /server/, intenta en la raíz del proyecto
             if (!configFile.exists()) {
                 configFile = new File(basePath + File.separator + "config.properties");
             }

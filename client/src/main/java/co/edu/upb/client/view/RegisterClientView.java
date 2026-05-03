@@ -29,17 +29,18 @@ public class RegisterClientView {
 
     @FunctionalInterface
     public interface RegisterHandler {
+
         void handle(String id, String names, String lastNames,
-                    String idType, String address,
-                    String password, String confirm);
+                String idType, String address,
+                String password, String confirm);
     }
 
-    private JFrame         frame;
-    private JTextField     fieldId, fieldNames, fieldLastNames, fieldAddress;
+    private JFrame frame;
+    private JTextField fieldId, fieldNames, fieldLastNames, fieldAddress;
     private JComboBox<String> fieldIdType;
     private JPasswordField fieldPassword, fieldConfirm;
-    private JLabel         labelError;
-    private JButton        btnRegister, btnBack;
+    private JLabel labelError;
+    private JButton btnRegister, btnBack;
 
     public RegisterClientView() {
         build();
@@ -53,7 +54,6 @@ public class RegisterClientView {
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
 
-        // ── Panel izquierdo ───────────────────────────────────────
         JPanel left = new JPanel(new BorderLayout());
         left.setBackground(new Color(30, 58, 95));
         left.setPreferredSize(new Dimension(320, 600));
@@ -81,7 +81,6 @@ public class RegisterClientView {
         leftContent.add(appSub);
         left.add(leftContent, BorderLayout.CENTER);
 
-        // ── Panel derecho — formulario ────────────────────────────
         JPanel right = new JPanel(new GridBagLayout());
         right.setBackground(new Color(245, 247, 250));
         right.setBorder(new EmptyBorder(30, 50, 30, 50));
@@ -91,22 +90,21 @@ public class RegisterClientView {
         form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
 
         JLabel title = label("Crear Cuenta", 24, Font.BOLD, new Color(30, 58, 95));
-        JLabel sub   = label("Completa tus datos para registrarte", 13, Font.PLAIN, new Color(120, 130, 145));
+        JLabel sub = label("Completa tus datos para registrarte", 13, Font.PLAIN, new Color(120, 130, 145));
 
-        // Campos en dos columnas
         JPanel fields = new JPanel(new GridLayout(0, 2, 16, 12));
         fields.setOpaque(false);
         fields.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        fieldId        = addField(fields, "Identificación");
-        fieldNames     = addField(fields, "Nombres");
+        fieldId = addField(fields, "Identificación");
+        fieldNames = addField(fields, "Nombres");
         fieldLastNames = addField(fields, "Apellidos");
         fields.add(styledLabel("Tipo de identificación"));
         fieldIdType = new JComboBox<>(new String[]{"CC", "TI", "CE"});
         fields.add(fieldIdType);
         fieldAddress = addField(fields, "Dirección");
 
-        JLabel lblPass    = label("Contraseña", 12, Font.BOLD, new Color(60, 70, 85));
+        JLabel lblPass = label("Contraseña", 12, Font.BOLD, new Color(60, 70, 85));
         lblPass.setAlignmentX(Component.LEFT_ALIGNMENT);
         fieldPassword = new JPasswordField();
         styleComp(fieldPassword);
@@ -132,15 +130,24 @@ public class RegisterClientView {
         btnBack.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnBack.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        form.add(title);         form.add(Box.createVerticalStrut(4));
-        form.add(sub);           form.add(Box.createVerticalStrut(20));
-        form.add(fields);        form.add(Box.createVerticalStrut(12));
-        form.add(lblPass);       form.add(Box.createVerticalStrut(6));
-        form.add(fieldPassword); form.add(Box.createVerticalStrut(12));
-        form.add(lblConfirm);    form.add(Box.createVerticalStrut(6));
-        form.add(fieldConfirm);  form.add(Box.createVerticalStrut(8));
-        form.add(labelError);    form.add(Box.createVerticalStrut(8));
-        form.add(btnRegister);   form.add(Box.createVerticalStrut(8));
+        form.add(title);
+        form.add(Box.createVerticalStrut(4));
+        form.add(sub);
+        form.add(Box.createVerticalStrut(20));
+        form.add(fields);
+        form.add(Box.createVerticalStrut(12));
+        form.add(lblPass);
+        form.add(Box.createVerticalStrut(6));
+        form.add(fieldPassword);
+        form.add(Box.createVerticalStrut(12));
+        form.add(lblConfirm);
+        form.add(Box.createVerticalStrut(6));
+        form.add(fieldConfirm);
+        form.add(Box.createVerticalStrut(8));
+        form.add(labelError);
+        form.add(Box.createVerticalStrut(8));
+        form.add(btnRegister);
+        form.add(Box.createVerticalStrut(8));
         form.add(btnBack);
 
         right.add(form);
@@ -150,17 +157,15 @@ public class RegisterClientView {
         frame.setVisible(true);
     }
 
-    // ── Métodos para que el controller enlace acciones ────────────
-
     public void onRegister(RegisterHandler handler) {
         btnRegister.addActionListener(e -> handler.handle(
-            fieldId.getText().trim(),
-            fieldNames.getText().trim(),
-            fieldLastNames.getText().trim(),
-            (String) fieldIdType.getSelectedItem(),
-            fieldAddress.getText().trim(),
-            new String(fieldPassword.getPassword()),
-            new String(fieldConfirm.getPassword())
+                fieldId.getText().trim(),
+                fieldNames.getText().trim(),
+                fieldLastNames.getText().trim(),
+                (String) fieldIdType.getSelectedItem(),
+                fieldAddress.getText().trim(),
+                new String(fieldPassword.getPassword()),
+                new String(fieldConfirm.getPassword())
         ));
     }
 
@@ -168,13 +173,17 @@ public class RegisterClientView {
         btnBack.addActionListener(e -> handler.run());
     }
 
-    public void showError(String msg) { labelError.setText(msg); }
+    public void showError(String msg) {
+        labelError.setText(msg);
+    }
+
     public void showSuccess(String msg) {
         JOptionPane.showMessageDialog(frame, msg, "Éxito", JOptionPane.INFORMATION_MESSAGE);
     }
-    public void close() { frame.dispose(); }
 
-    // ── Helpers de estilo ─────────────────────────────────────────
+    public void close() {
+        frame.dispose();
+    }
 
     private JTextField addField(JPanel panel, String labelText) {
         panel.add(styledLabel(labelText));
@@ -205,8 +214,8 @@ public class RegisterClientView {
         c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
         c.setAlignmentX(Component.LEFT_ALIGNMENT);
         c.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 210, 220)),
-            new EmptyBorder(5, 10, 5, 10)
+                BorderFactory.createLineBorder(new Color(200, 210, 220)),
+                new EmptyBorder(5, 10, 5, 10)
         ));
     }
 

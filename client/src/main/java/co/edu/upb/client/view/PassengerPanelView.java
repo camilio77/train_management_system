@@ -23,31 +23,33 @@ import javax.swing.table.DefaultTableModel;
 
 public class PassengerPanelView {
 
-    // ── record simple para retornar datos del diálogo ─────────────
     public static class ProfileData {
+
         public final String nombres, apellidos, tipoId, direccion;
+
         public ProfileData(String n, String a, String t, String d) {
-            nombres = n; apellidos = a; tipoId = t; direccion = d;
+            nombres = n;
+            apellidos = a;
+            tipoId = t;
+            direccion = d;
         }
     }
 
-    private JFrame            frame;
-    private JLabel            nameLabel;
-    private JLabel            bannerActivo;
+    private JFrame frame;
+    private JLabel nameLabel;
+    private JLabel bannerActivo;
 
-    // Tab rutas
     private DefaultTableModel routeModel;
-    private JTable            routeTable;
+    private JTable routeTable;
 
-    // Tab tickets
     private DefaultTableModel ticketModel;
-    private JTable            ticketTable;
+    private JTable ticketTable;
 
     private JButton btnLogout, btnRefresh, btnBuyTicket, btnEditProfile, btnViewTickets;
 
     private static final Color DARK_BLUE = new Color(30, 58, 95);
-    private static final Color BG        = new Color(245, 247, 250);
-    private static final Color GREEN     = new Color(34, 139, 80);
+    private static final Color BG = new Color(245, 247, 250);
+    private static final Color GREEN = new Color(34, 139, 80);
 
     public PassengerPanelView(String passengerName) {
         build(passengerName);
@@ -60,7 +62,6 @@ public class PassengerPanelView {
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
 
-        // ── Header ────────────────────────────────────────────────
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(DARK_BLUE);
         header.setBorder(new EmptyBorder(14, 24, 14, 24));
@@ -74,7 +75,7 @@ public class PassengerPanelView {
         nameLabel.setForeground(new Color(180, 200, 220));
 
         btnEditProfile = headerBtn("✏ Mi Perfil", new Color(60, 100, 150));
-        btnLogout      = headerBtn("Cerrar Sesión", new Color(220, 60, 60));
+        btnLogout = headerBtn("Cerrar Sesión", new Color(220, 60, 60));
 
         JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         headerRight.setOpaque(false);
@@ -85,7 +86,6 @@ public class PassengerPanelView {
         header.add(title, BorderLayout.WEST);
         header.add(headerRight, BorderLayout.EAST);
 
-        // ── Banner ticket activo ───────────────────────────────────
         bannerActivo = new JLabel(" ", JLabel.CENTER);
         bannerActivo.setFont(new Font("Arial", Font.BOLD, 13));
         bannerActivo.setOpaque(true);
@@ -94,13 +94,11 @@ public class PassengerPanelView {
         bannerActivo.setBorder(new EmptyBorder(6, 0, 6, 0));
         bannerActivo.setVisible(false);
 
-        // ── Tabs ──────────────────────────────────────────────────
         JTabbedPane tabs = new JTabbedPane();
         tabs.setFont(new Font("Arial", Font.BOLD, 13));
         tabs.addTab("🛤 Rutas disponibles", buildRouteTab());
-        tabs.addTab("🎫 Mis Tickets",       buildTicketTab());
+        tabs.addTab("🎫 Mis Tickets", buildTicketTab());
 
-        // ── Panel central ─────────────────────────────────────────
         JPanel center = new JPanel(new BorderLayout());
         center.add(bannerActivo, BorderLayout.NORTH);
         center.add(tabs, BorderLayout.CENTER);
@@ -110,19 +108,20 @@ public class PassengerPanelView {
         frame.setVisible(true);
     }
 
-    // ── Tab Rutas ─────────────────────────────────────────────────
     private JPanel buildRouteTab() {
         String[] cols = {"ID", "Tren", "Origen", "Destino", "Fecha Salida", "Fecha Llegada"};
         routeModel = new DefaultTableModel(cols, 0) {
-            public boolean isCellEditable(int r, int c) { return false; }
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         routeTable = styledTable(routeModel);
 
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
         buttons.setBackground(BG);
 
-        btnRefresh    = actionBtn("↻ Actualizar",    new Color(100, 110, 125));
-        btnBuyTicket  = actionBtn("🎫 Comprar Ticket", GREEN);
+        btnRefresh = actionBtn("↻ Actualizar", new Color(100, 110, 125));
+        btnBuyTicket = actionBtn("🎫 Comprar Ticket", GREEN);
 
         buttons.add(btnRefresh);
         buttons.add(btnBuyTicket);
@@ -135,11 +134,12 @@ public class PassengerPanelView {
         return panel;
     }
 
-    // ── Tab Tickets ───────────────────────────────────────────────
     private JPanel buildTicketTab() {
         String[] cols = {"ID", "Origen", "Destino", "Categoría", "Valor", "Asiento", "Estado"};
         ticketModel = new DefaultTableModel(cols, 0) {
-            public boolean isCellEditable(int r, int c) { return false; }
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         ticketTable = styledTable(ticketModel);
 
@@ -157,21 +157,23 @@ public class PassengerPanelView {
         return panel;
     }
 
-    // ── Métodos de datos ──────────────────────────────────────────
-
     public void addRoute(String id, String tren, String origen,
-                         String destino, String salida, String llegada) {
+            String destino, String salida, String llegada) {
         routeModel.addRow(new Object[]{id, tren, origen, destino, salida, llegada});
     }
 
-    public void clearRoutes()  { routeModel.setRowCount(0); }
+    public void clearRoutes() {
+        routeModel.setRowCount(0);
+    }
 
     public void addTicket(String id, String origen, String destino,
-                          String cat, String valor, String asiento, String estado) {
+            String cat, String valor, String asiento, String estado) {
         ticketModel.addRow(new Object[]{id, origen, destino, cat, valor, asiento, estado});
     }
 
-    public void clearTickets() { ticketModel.setRowCount(0); }
+    public void clearTickets() {
+        ticketModel.setRowCount(0);
+    }
 
     public void setActiveTicketBanner(boolean hasActive) {
         SwingUtilities.invokeLater(() -> {
@@ -188,25 +190,26 @@ public class PassengerPanelView {
         SwingUtilities.invokeLater(() -> nameLabel.setText("👤 " + fullName));
     }
 
-    // ── Diálogo editar perfil ─────────────────────────────────────
     public ProfileData showEditProfileDialog(String nombres, String apellidos,
-                                             String tipoId, String direccion) {
-        JTextField fNombres   = new JTextField(nombres, 18);
+            String tipoId, String direccion) {
+        JTextField fNombres = new JTextField(nombres, 18);
         JTextField fApellidos = new JTextField(apellidos, 18);
         JComboBox<String> fTipo = new JComboBox<>(new String[]{"CC", "TI", "CE"});
         fTipo.setSelectedItem(tipoId);
         JTextField fDireccion = new JTextField(direccion, 18);
 
         Object[] fields = {
-            "Nombres:",    fNombres,
-            "Apellidos:",  fApellidos,
-            "Tipo ID:",    fTipo,
-            "Dirección:",  fDireccion
+            "Nombres:", fNombres,
+            "Apellidos:", fApellidos,
+            "Tipo ID:", fTipo,
+            "Dirección:", fDireccion
         };
 
         int r = JOptionPane.showConfirmDialog(frame, fields,
-            "Editar mi perfil", JOptionPane.OK_CANCEL_OPTION);
-        if (r != JOptionPane.OK_OPTION) return null;
+                "Editar mi perfil", JOptionPane.OK_CANCEL_OPTION);
+        if (r != JOptionPane.OK_OPTION) {
+            return null;
+        }
 
         String n = fNombres.getText().trim();
         String a = fApellidos.getText().trim();
@@ -215,33 +218,51 @@ public class PassengerPanelView {
             return null;
         }
         return new ProfileData(n, a, (String) fTipo.getSelectedItem(),
-            fDireccion.getText().trim());
+                fDireccion.getText().trim());
     }
 
-    // ── Listeners ─────────────────────────────────────────────────
-    public void onLogout(Runnable h)      { btnLogout.addActionListener(e -> h.run()); }
-    public void onRefresh(Runnable h)     { btnRefresh.addActionListener(e -> h.run()); }
-    public void onBuyTicket(Runnable h)   { btnBuyTicket.addActionListener(e -> h.run()); }
-    public void onEditProfile(Runnable h) { btnEditProfile.addActionListener(e -> h.run()); }
-    public void onViewTickets(Runnable h) { btnViewTickets.addActionListener(e -> h.run()); }
+    public void onLogout(Runnable h) {
+        btnLogout.addActionListener(e -> h.run());
+    }
 
-    // ── Helpers ───────────────────────────────────────────────────
+    public void onRefresh(Runnable h) {
+        btnRefresh.addActionListener(e -> h.run());
+    }
+
+    public void onBuyTicket(Runnable h) {
+        btnBuyTicket.addActionListener(e -> h.run());
+    }
+
+    public void onEditProfile(Runnable h) {
+        btnEditProfile.addActionListener(e -> h.run());
+    }
+
+    public void onViewTickets(Runnable h) {
+        btnViewTickets.addActionListener(e -> h.run());
+    }
+
     public void showError(String msg) {
         JOptionPane.showMessageDialog(frame, msg, "Error", JOptionPane.ERROR_MESSAGE);
     }
+
     public void showSuccess(String msg) {
         JOptionPane.showMessageDialog(frame, msg, "Éxito", JOptionPane.INFORMATION_MESSAGE);
     }
-    public void close() { frame.dispose(); }
+
+    public void close() {
+        frame.dispose();
+    }
 
     public String getSelectedRouteId() {
         int row = routeTable.getSelectedRow();
         return row < 0 ? null : routeModel.getValueAt(row, 0).toString();
     }
+
     public String getSelectedRouteOrigen() {
         int row = routeTable.getSelectedRow();
         return row < 0 ? null : routeModel.getValueAt(row, 2).toString();
     }
+
     public String getSelectedRouteDestino() {
         int row = routeTable.getSelectedRow();
         return row < 0 ? null : routeModel.getValueAt(row, 3).toString();

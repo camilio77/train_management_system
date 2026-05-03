@@ -1,18 +1,24 @@
 package co.edu.upb.train_management_system.model.station;
 
-import co.edu.upb.app.LinkedList.singly.LinkedList;
-import co.edu.upb.train_management_system.DataBase.DatabaseConnection;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import co.edu.upb.app.LinkedList.singly.LinkedList;
+import co.edu.upb.train_management_system.DataBase.DatabaseConnection;
 
 public class StationService extends UnicastRemoteObject implements StationInterface {
     private static StationService instance;
 
-    protected StationService() throws RemoteException { super(); }
+    protected StationService() throws RemoteException {
+        super();
+    }
 
     public static StationService getInstance() throws RemoteException {
-        if (instance == null) instance = new StationService();
+        if (instance == null)
+            instance = new StationService();
         return instance;
     }
 
@@ -27,21 +33,25 @@ public class StationService extends UnicastRemoteObject implements StationInterf
 
     @Override
     public void create(String nombre) throws SQLException {
-        PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement("INSERT INTO estacion (nombre) VALUES (?)");
+        PreparedStatement stmt = DatabaseConnection.getConnection()
+                .prepareStatement("INSERT INTO estacion (nombre) VALUES (?)");
         stmt.setString(1, nombre);
         stmt.executeUpdate();
     }
 
     @Override
     public void update(int id, String nombre) throws SQLException {
-        PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement("UPDATE estacion SET nombre=? WHERE id_estacion=?");
-        stmt.setString(1, nombre); stmt.setInt(2, id);
+        PreparedStatement stmt = DatabaseConnection.getConnection()
+                .prepareStatement("UPDATE estacion SET nombre=? WHERE id_estacion=?");
+        stmt.setString(1, nombre);
+        stmt.setInt(2, id);
         stmt.executeUpdate();
     }
 
     @Override
     public void delete(int id) throws SQLException {
-        PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement("DELETE FROM estacion WHERE id_estacion=?");
+        PreparedStatement stmt = DatabaseConnection.getConnection()
+                .prepareStatement("DELETE FROM estacion WHERE id_estacion=?");
         stmt.setInt(1, id);
         stmt.executeUpdate();
     }

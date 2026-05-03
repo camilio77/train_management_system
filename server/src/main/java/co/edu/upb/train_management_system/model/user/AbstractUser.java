@@ -1,8 +1,8 @@
 package co.edu.upb.train_management_system.model.user;
 
-import co.edu.upb.app.LinkedList.singly.LinkedList;
-
 import java.io.Serializable;
+
+import co.edu.upb.app.LinkedList.singly.LinkedList;
 
 public abstract class AbstractUser implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -65,11 +65,11 @@ public abstract class AbstractUser implements Serializable {
         return cellPhones.toString();
     }
 
-    public boolean addCellphone(String cellPhoneNumber){
+    public boolean addCellphone(String cellPhoneNumber) {
         return cellPhones.add(cellPhoneNumber);
     }
 
-    public boolean deleteCellPhone(String cellPhone){
+    public boolean deleteCellPhone(String cellPhone) {
         return cellPhones.remove(cellPhone);
     }
 }

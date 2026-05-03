@@ -17,8 +17,8 @@ import javax.swing.WindowConstants;
 
 public class ClientView {
 
-    private JFrame  frame;
-    private JLabel  console;
+    private JFrame frame;
+    private JLabel console;
     private JButton btnConnect;
     private JButton btnDisconnect;
     private final String title;
@@ -29,7 +29,6 @@ public class ClientView {
     }
 
     private void buildComponents() {
-        // ── consola ───────────────────────────────────────────────
         JPanel panelConsole = new JPanel(new BorderLayout());
         panelConsole.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
@@ -38,12 +37,11 @@ public class ClientView {
         console.setBackground(Color.WHITE);
         console.setFont(new Font("Monospaced", Font.PLAIN, 13));
         console.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(180, 180, 180)),
-            BorderFactory.createEmptyBorder(6, 8, 6, 8)
+                BorderFactory.createLineBorder(new Color(180, 180, 180)),
+                BorderFactory.createEmptyBorder(6, 8, 6, 8)
         ));
         panelConsole.add(console, BorderLayout.CENTER);
 
-        // ── botones ───────────────────────────────────────────────
         JPanel panelButtons = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 8));
 
         btnConnect = new JButton("▶ Conectar");
@@ -60,7 +58,6 @@ public class ClientView {
         panelButtons.add(btnConnect);
         panelButtons.add(btnDisconnect);
 
-        // ── frame principal ───────────────────────────────────────
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(panelConsole, BorderLayout.CENTER);
         mainPanel.add(panelButtons, BorderLayout.SOUTH);
@@ -74,13 +71,11 @@ public class ClientView {
     }
 
     public void initComponents(UnaryOperator<Void> onConnect,
-                               UnaryOperator<Void> onDisconnect) {
+            UnaryOperator<Void> onDisconnect) {
         btnConnect.addActionListener(e -> onConnect.apply(null));
         btnDisconnect.addActionListener(e -> onDisconnect.apply(null));
         frame.setVisible(true);
     }
-
-    // ── métodos de estado ─────────────────────────────────────────
 
     public void onConnected() {
         SwingUtilities.invokeLater(() -> {

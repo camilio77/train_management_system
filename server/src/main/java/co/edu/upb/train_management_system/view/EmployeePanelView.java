@@ -103,9 +103,8 @@ public class EmployeePanelView {
         frame.setVisible(true);
     }
 
-    // ─── TRENES — solo lectura ─────────────────────────────────────
     private JPanel buildTrainTab() {
-        String[] cols = {"ID", "Nombre", "Tipo", "Kilometraje"};
+        String[] cols = { "ID", "Nombre", "Tipo", "Kilometraje" };
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) {
                 return false;
@@ -126,7 +125,7 @@ public class EmployeePanelView {
         model.setRowCount(0);
         try {
             TrainService.getInstance().getAll().forEach(t -> {
-                model.addRow(new Object[]{t.getId(), t.getName(), t.getType(), t.getMileage()});
+                model.addRow(new Object[] { t.getId(), t.getName(), t.getType(), t.getMileage() });
                 return null;
             });
         } catch (Exception ex) {
@@ -134,9 +133,8 @@ public class EmployeePanelView {
         }
     }
 
-    // ─── ESTACIONES — solo lectura ─────────────────────────────────
     private JPanel buildStationTab() {
-        String[] cols = {"ID", "Nombre"};
+        String[] cols = { "ID", "Nombre" };
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) {
                 return false;
@@ -157,7 +155,7 @@ public class EmployeePanelView {
         model.setRowCount(0);
         try {
             StationService.getInstance().getAll().forEach(s -> {
-                model.addRow(new Object[]{s.getId(), s.getName()});
+                model.addRow(new Object[] { s.getId(), s.getName() });
                 return null;
             });
         } catch (Exception ex) {
@@ -165,9 +163,8 @@ public class EmployeePanelView {
         }
     }
 
-    // ─── RUTAS — CRUD completo ─────────────────────────────────────
     private JPanel buildRouteTab() {
-        String[] cols = {"ID", "Tren", "Origen", "Destino", "Fecha Salida", "Fecha Llegada"};
+        String[] cols = { "ID", "Tren", "Origen", "Destino", "Fecha Salida", "Fecha Llegada" };
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) {
                 return false;
@@ -221,9 +218,10 @@ public class EmployeePanelView {
 
                 var stRenderer = new DefaultListCellRenderer() {
                     public Component getListCellRendererComponent(JList<?> list, Object value,
-                                                                  int index, boolean isSelected, boolean cellHasFocus) {
+                            int index, boolean isSelected, boolean cellHasFocus) {
                         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                        if (value instanceof Station s) setText(s.getName());
+                        if (value instanceof Station s)
+                            setText(s.getName());
                         return this;
                     }
                 };
@@ -247,7 +245,8 @@ public class EmployeePanelView {
                     Station destino = (Station) cmbDestino.getSelectedItem();
 
                     if (origen.getId().equals(destino.getId())) {
-                        JOptionPane.showMessageDialog(frame, "Origen y destino no pueden ser iguales.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "Origen y destino no pueden ser iguales.", "Error",
+                                JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
@@ -255,8 +254,7 @@ public class EmployeePanelView {
                     RouteService.getInstance().create(
                             trenSel.getId(), origen.getId(), destino.getId(),
                             Timestamp.valueOf(salida.getText().trim()),
-                            Timestamp.valueOf(llegada.getText().trim())
-                    );
+                            Timestamp.valueOf(llegada.getText().trim()));
                     loadRoutes(model);
                 }
             } catch (Exception ex) {
@@ -273,7 +271,7 @@ public class EmployeePanelView {
 
             JTextField salida = new JTextField(model.getValueAt(row, 4).toString());
             JTextField llegada = new JTextField(model.getValueAt(row, 5).toString());
-            Object[] fields = {"Fecha Salida:", salida, "Fecha Llegada:", llegada};
+            Object[] fields = { "Fecha Salida:", salida, "Fecha Llegada:", llegada };
 
             int r = JOptionPane.showConfirmDialog(frame, fields, "Editar Ruta", JOptionPane.OK_CANCEL_OPTION);
             if (r == JOptionPane.OK_OPTION) {
@@ -281,8 +279,7 @@ public class EmployeePanelView {
                     RouteService.getInstance().update(
                             model.getValueAt(row, 0).toString(),
                             Timestamp.valueOf(salida.getText().trim()),
-                            Timestamp.valueOf(llegada.getText().trim())
-                    );
+                            Timestamp.valueOf(llegada.getText().trim()));
                     loadRoutes(model);
                 } catch (Exception ex) {
                     showError(ex);
@@ -298,7 +295,8 @@ public class EmployeePanelView {
             }
 
             String id = model.getValueAt(row, 0).toString();
-            int confirm = JOptionPane.showConfirmDialog(frame, "¿Eliminar ruta " + id + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(frame, "¿Eliminar ruta " + id + "?", "Confirmar",
+                    JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 try {
                     RouteService.getInstance().delete(id);
@@ -316,7 +314,7 @@ public class EmployeePanelView {
         model.setRowCount(0);
         try {
             RouteService.getInstance().getAll().forEach(r -> {
-                model.addRow(new Object[]{
+                model.addRow(new Object[] {
                         r.getId(),
                         r.getTrainName(),
                         r.getOriginName(),
@@ -331,9 +329,8 @@ public class EmployeePanelView {
         }
     }
 
-    // ─── VAGONES — CRUD completo ───────────────────────────────────
     private JPanel buildWagonTab() {
-        String[] cols = {"ID", "ID Tren", "Tipo", "Capacidad"};
+        String[] cols = { "ID", "ID Tren", "Tipo", "Capacidad" };
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) {
                 return false;
@@ -375,24 +372,24 @@ public class EmployeePanelView {
                     return lbl;
                 });
 
-                JComboBox<String> tipo = new JComboBox<>(new String[]{"PASAJEROS", "EQUIPAJE"});
+                JComboBox<String> tipo = new JComboBox<>(new String[] { "PASAJEROS", "EQUIPAJE" });
                 JTextField capacidad = new JTextField("32");
 
-                // Ajusta la capacidad por defecto según el tipo seleccionado
                 tipo.addActionListener(ev -> {
-                    if ("PASAJEROS".equals(tipo.getSelectedItem())) capacidad.setText("32");
-                    else capacidad.setText("0");
+                    if ("PASAJEROS".equals(tipo.getSelectedItem()))
+                        capacidad.setText("32");
+                    else
+                        capacidad.setText("0");
                 });
 
-                Object[] fields = {"Tren:", cmbTren, "Tipo:", tipo, "Capacidad:", capacidad};
+                Object[] fields = { "Tren:", cmbTren, "Tipo:", tipo, "Capacidad:", capacidad };
                 int r = JOptionPane.showConfirmDialog(frame, fields, "Agregar Vagón", JOptionPane.OK_CANCEL_OPTION);
                 if (r == JOptionPane.OK_OPTION) {
                     Train trenSel = (Train) cmbTren.getSelectedItem();
                     WagonService.getInstance().create(
                             Integer.parseInt(trenSel.getId()),
                             (String) tipo.getSelectedItem(),
-                            Integer.parseInt(capacidad.getText().trim())
-                    );
+                            Integer.parseInt(capacidad.getText().trim()));
                     loadWagons(model);
                 }
             } catch (Exception ex) {
@@ -408,17 +405,16 @@ public class EmployeePanelView {
             }
 
             int id = Integer.parseInt(model.getValueAt(row, 0).toString());
-            JComboBox<String> tipo = new JComboBox<>(new String[]{"PASAJEROS", "EQUIPAJE"});
+            JComboBox<String> tipo = new JComboBox<>(new String[] { "PASAJEROS", "EQUIPAJE" });
             tipo.setSelectedItem(model.getValueAt(row, 2).toString());
             JTextField capacidad = new JTextField(model.getValueAt(row, 3).toString());
-            Object[] fields = {"Tipo:", tipo, "Capacidad:", capacidad};
+            Object[] fields = { "Tipo:", tipo, "Capacidad:", capacidad };
             int r = JOptionPane.showConfirmDialog(frame, fields, "Editar Vagón", JOptionPane.OK_CANCEL_OPTION);
             if (r == JOptionPane.OK_OPTION) {
                 try {
                     WagonService.getInstance().update(id,
                             (String) tipo.getSelectedItem(),
-                            Integer.parseInt(capacidad.getText().trim())
-                    );
+                            Integer.parseInt(capacidad.getText().trim()));
                     loadWagons(model);
                 } catch (Exception ex) {
                     showError(ex);
@@ -434,7 +430,8 @@ public class EmployeePanelView {
             }
 
             int id = Integer.parseInt(model.getValueAt(row, 0).toString());
-            int confirm = JOptionPane.showConfirmDialog(frame, "¿Eliminar vagón " + id + "?", "Confirmar", JOptionPane.YES_NO_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(frame, "¿Eliminar vagón " + id + "?", "Confirmar",
+                    JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
                 try {
                     WagonService.getInstance().delete(id);
@@ -454,15 +451,14 @@ public class EmployeePanelView {
             String sql = "SELECT id_vagon, id_tren, tipo, capacidad FROM vagon";
             var rs = DatabaseConnection.getConnection().createStatement().executeQuery(sql);
             while (rs.next())
-                model.addRow(new Object[]{rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getInt(4)});
+                model.addRow(new Object[] { rs.getInt(1), rs.getInt(2), rs.getString(3), rs.getInt(4) });
         } catch (Exception ex) {
             showError(ex);
         }
     }
 
-    // ─── PASAJEROS — ver y editar, sin eliminar ────────────────────
     private JPanel buildPassengerTab() {
-        String[] cols = {"Identificación", "Nombres", "Apellidos", "Tipo ID", "Dirección"};
+        String[] cols = { "Identificación", "Nombres", "Apellidos", "Tipo ID", "Dirección" };
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) {
                 return false;
@@ -491,11 +487,11 @@ public class EmployeePanelView {
             String id = model.getValueAt(row, 0).toString();
             JTextField nombres = new JTextField(model.getValueAt(row, 1).toString());
             JTextField apellidos = new JTextField(model.getValueAt(row, 2).toString());
-            JComboBox<String> tipoId = new JComboBox<>(new String[]{"CC", "TI", "CE"});
+            JComboBox<String> tipoId = new JComboBox<>(new String[] { "CC", "TI", "CE" });
             tipoId.setSelectedItem(model.getValueAt(row, 3).toString());
             JTextField direccion = new JTextField(model.getValueAt(row, 4).toString());
-            Object[] fields = {"Nombres:", nombres, "Apellidos:", apellidos,
-                    "Tipo ID:", tipoId, "Dirección:", direccion};
+            Object[] fields = { "Nombres:", nombres, "Apellidos:", apellidos,
+                    "Tipo ID:", tipoId, "Dirección:", direccion };
             int r = JOptionPane.showConfirmDialog(frame, fields, "Editar Pasajero", JOptionPane.OK_CANCEL_OPTION);
             if (r == JOptionPane.OK_OPTION) {
                 try {
@@ -517,7 +513,7 @@ public class EmployeePanelView {
         try {
             UserService.getInstance().getAllPassengers().forEach(p -> {
                 String[] parts = p.getFullName().split(" ", 2);
-                model.addRow(new Object[]{
+                model.addRow(new Object[] {
                         p.getIdentificacion(), parts[0],
                         parts.length > 1 ? parts[1] : "",
                         p.getIdentificationType(), p.getAddress()
@@ -529,37 +525,37 @@ public class EmployeePanelView {
         }
     }
 
-    // ─── EDITAR MI PERFIL ──────────────────────────────────────────
     private void showEditProfileDialog(AbstractUserWithPower employee) {
         String[] parts = employee.getFullName().split(" ", 2);
         JTextField nombres = new JTextField(parts[0]);
         JTextField apellidos = new JTextField(parts.length > 1 ? parts[1] : "");
-        JComboBox<String> tipoId = new JComboBox<>(new String[]{"CC", "TI", "CE"});
+        JComboBox<String> tipoId = new JComboBox<>(new String[] { "CC", "TI", "CE" });
         tipoId.setSelectedItem(employee.getIdentificationType());
         JPasswordField pass = new JPasswordField();
         JPasswordField confirmPass = new JPasswordField();
 
-        Object[] fields = {"Nombres:", nombres, "Apellidos:", apellidos,
-                "Tipo ID:", tipoId, "Nueva contraseña:", pass, "Confirmar contraseña:", confirmPass};
+        Object[] fields = { "Nombres:", nombres, "Apellidos:", apellidos,
+                "Tipo ID:", tipoId, "Nueva contraseña:", pass, "Confirmar contraseña:", confirmPass };
 
         int r = JOptionPane.showConfirmDialog(frame, fields, "Editar mi perfil", JOptionPane.OK_CANCEL_OPTION);
         if (r == JOptionPane.OK_OPTION) {
             String p1 = new String(pass.getPassword());
             String p2 = new String(confirmPass.getPassword());
             if (!p1.equals(p2)) {
-                JOptionPane.showMessageDialog(frame, "Las contraseñas no coinciden.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Las contraseñas no coinciden.", "Error",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
             if (p1.isEmpty()) {
-                JOptionPane.showMessageDialog(frame, "La contraseña no puede estar vacía.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "La contraseña no puede estar vacía.", "Error",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
             try {
                 UserService.getInstance().updateEmployee(
                         employee.getIdentificacion(),
                         nombres.getText().trim(), apellidos.getText().trim(),
-                        (String) tipoId.getSelectedItem()
-                );
+                        (String) tipoId.getSelectedItem());
                 JOptionPane.showMessageDialog(frame, "Perfil actualizado correctamente.");
             } catch (Exception ex) {
                 showError(ex);
@@ -567,7 +563,6 @@ public class EmployeePanelView {
         }
     }
 
-    // ─── HELPERS ──────────────────────────────────────────────────
     private JPanel buildTabPanel(JTable table, JPanel buttons) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BG);

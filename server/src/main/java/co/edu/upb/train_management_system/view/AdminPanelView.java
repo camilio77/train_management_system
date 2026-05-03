@@ -29,7 +29,6 @@ public class AdminPanelView {
 
     private JFrame frame;
 
-    // Colores consistentes con LoginView
     private static final Color DARK_BLUE = new Color(30, 58, 95);
     private static final Color BG = new Color(245, 247, 250);
 
@@ -98,7 +97,6 @@ public class AdminPanelView {
         frame.setVisible(true);
     }
 
-    // ─── TAB TRENES ───────────────────────────────────────────────
     private JPanel buildTrainTab() {
         String[] cols = {"ID", "Nombre", "Tipo", "Kilometraje"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
@@ -196,7 +194,6 @@ public class AdminPanelView {
         }
     }
 
-    // ─── TAB ESTACIONES ───────────────────────────────────────────
     private JPanel buildStationTab() {
         String[] cols = {"ID", "Nombre"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
@@ -289,16 +286,13 @@ public class AdminPanelView {
         }
     }
 
-    // ─── TAB CONEXIONES ───────────────────────────────────────────
     private JPanel buildConnectionTab() {
-        // idOrigen e idDestino en columnas ocultas (índice 0 y 2)
         String[] cols = {"ID Origen", "Estación Origen", "ID Destino", "Estación Destino", "Distancia (km)"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
         JTable table = styledTable(model);
 
-        // Ocultar columnas de ID (solo para uso interno)
         table.getColumnModel().getColumn(0).setMinWidth(0);
         table.getColumnModel().getColumn(0).setMaxWidth(0);
         table.getColumnModel().getColumn(0).setWidth(0);
@@ -332,7 +326,6 @@ public class AdminPanelView {
 
         btnAdd.addActionListener(e -> {
             try {
-                // Carga estaciones para mostrar en combos
                 LinkedList<Station> estaciones = StationService.getInstance().getAll();
                 if (estaciones.size() < 2) {
                     JOptionPane.showMessageDialog(frame, "Se necesitan al menos 2 estaciones registradas.");
@@ -348,7 +341,6 @@ public class AdminPanelView {
                 });
                 cmbDestino.setSelectedIndex(1);
 
-                // Renderer que muestra el nombre
                 var renderer = new javax.swing.DefaultListCellRenderer() {
                     public java.awt.Component getListCellRendererComponent(
                             JList<?> list, Object value, int index,
@@ -387,8 +379,6 @@ public class AdminPanelView {
 
                     double km = Double.parseDouble(distancia.getText().trim());
 
-                    // Guardar en BD y actualizar grafo usando StationGraphService
-                    // (acceso directo al singleton porque estamos en el servidor)
                     StationGraphService.getInstance().addConnection(
                             origen.getId(), destino.getId(), km);
 
@@ -434,7 +424,6 @@ public class AdminPanelView {
         model.setRowCount(0);
         try {
             StationGraphService.getInstance().getAllConnections().forEach(row -> {
-                // row = {idOrigen, nombreOrigen, idDestino, nombreDestino, distancia}
                 model.addRow(new Object[]{
                         row[0], row[1], row[2], row[3], row[4] + " km"
                 });
@@ -443,7 +432,6 @@ public class AdminPanelView {
         } catch (Exception ex) { showError(ex); }
     }
 
-    // ─── TAB RUTAS ────────────────────────────────────────────────
     private JPanel buildRouteTab() {
         String[] cols = {"ID", "Tren", "Origen", "Destino", "Fecha Salida", "Fecha Llegada"};
 
@@ -484,7 +472,6 @@ public class AdminPanelView {
                     return;
                 }
 
-                // ── Combo tren ────────────────────────────────────────────
                 JComboBox<Train> cmbTren = new JComboBox<>(trenes.toArray(new Train[0]));
                 cmbTren.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
                     JLabel lbl = new JLabel(value != null ? value.getId() + " — " + value.getName() : "");
@@ -492,7 +479,6 @@ public class AdminPanelView {
                     return lbl;
                 });
 
-                // ── Renderer de estaciones ────────────────────────────────
                 var stRenderer = new DefaultListCellRenderer() {
                     public Component getListCellRendererComponent(JList<?> list, Object value,
                                                                   int index, boolean isSelected, boolean cellHasFocus) {
@@ -502,20 +488,16 @@ public class AdminPanelView {
                     }
                 };
 
-                // ── Combo origen — todas las estaciones ───────────────────
                 JComboBox<Station> cmbOrigen  = new JComboBox<>(todasEstaciones.toArray(new Station[0]));
                 cmbOrigen.setRenderer(stRenderer);
 
-                // ── Combo destino — empieza vacío, se llena al elegir origen
                 JComboBox<Station> cmbDestino = new JComboBox<>();
                 cmbDestino.setRenderer(stRenderer);
 
-                // Etiqueta que avisa si no hay conexiones
                 JLabel lblSinConexion = new JLabel(" ");
                 lblSinConexion.setForeground(new Color(200, 80, 0));
                 lblSinConexion.setFont(new Font("Arial", Font.PLAIN, 11));
 
-                // Función que recarga el combo destino al cambiar origen
                 Runnable recargarDestinos = () -> {
                     cmbDestino.removeAllItems();
                     lblSinConexion.setText(" ");
@@ -534,10 +516,8 @@ public class AdminPanelView {
                     }
                 };
 
-                // Cargar destinos para la estación inicial seleccionada
                 recargarDestinos.run();
 
-                // Actualizar destinos cada vez que cambia el origen
                 cmbOrigen.addActionListener(ev -> recargarDestinos.run());
 
                 JTextField salida  = new JTextField("2025-06-01 08:00:00");
@@ -589,7 +569,6 @@ public class AdminPanelView {
             }
 
             int id = Integer.parseInt(model.getValueAt(row, 0).toString());
-            // columna 4 = Fecha Salida, columna 5 = Fecha Llegada
             JTextField salida = new JTextField(model.getValueAt(row, 4).toString());
             JTextField llegada = new JTextField(model.getValueAt(row, 5).toString());
             Object[] fields = {"Fecha Salida:", salida, "Fecha Llegada:", llegada};
@@ -598,7 +577,7 @@ public class AdminPanelView {
             if (r == JOptionPane.OK_OPTION) {
                 try {
                     RouteService.getInstance().update(
-                            model.getValueAt(row, 0).toString(),   // ya es String, no Integer.parseInt
+                            model.getValueAt(row, 0).toString(),
                             Timestamp.valueOf(salida.getText().trim()),
                             Timestamp.valueOf(llegada.getText().trim())
                     );
@@ -620,7 +599,7 @@ public class AdminPanelView {
             if (confirm == JOptionPane.YES_OPTION) {
                 try {
                     RouteService.getInstance().delete(
-                            model.getValueAt(row, 0).toString()    // ya es String
+                            model.getValueAt(row, 0).toString()
                     );
                     loadRoutes(model);
                 } catch (Exception ex) {
@@ -644,14 +623,13 @@ public class AdminPanelView {
                         r.getDateOfLeaving(),
                         r.getDateOfArrival()
                 });
-                return null; // Function<Route, Void> requiere retornar null
+                return null;
             });
         } catch (Exception ex) {
             showError(ex);
         }
     }
 
-    // ─── TAB VAGONES ──────────────────────────────────────────────
     private JPanel buildWagonTab() {
         String[] cols = {"ID", "ID Tren", "Tipo", "Capacidad"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
@@ -779,7 +757,6 @@ public class AdminPanelView {
         }
     }
 
-    // ─── TAB PASAJEROS ────────────────────────────────────────────
     private JPanel buildUserTab() {
         String[] cols = {"Identificación", "Nombres", "Apellidos", "Tipo ID", "Dirección"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
@@ -870,7 +847,6 @@ public class AdminPanelView {
         }
     }
 
-    // ─── TAB EMPLEADOS ────────────────────────────────────────────
     private JPanel buildEmployeeTab() {
         String[] cols = {"Identificación", "Nombres", "Apellidos", "Tipo ID"};
         DefaultTableModel model = new DefaultTableModel(cols, 0) {
@@ -965,7 +941,7 @@ public class AdminPanelView {
         return buildTabPanel(table, buttons);
     }
 
-    private void loadEmployees(DefaultTableModel model) {  // solo en AdminPanelView
+    private void loadEmployees(DefaultTableModel model) {
         model.setRowCount(0);
         try {
             UserService.getInstance().getAllEmployees().forEach(emp -> {
@@ -982,7 +958,6 @@ public class AdminPanelView {
         }
     }
 
-    // ─── HELPERS ──────────────────────────────────────────────────
     private JPanel buildTabPanel(JTable table, JPanel buttons) {
         JPanel panel = new JPanel(new BorderLayout(0, 0));
         panel.setBackground(BG);

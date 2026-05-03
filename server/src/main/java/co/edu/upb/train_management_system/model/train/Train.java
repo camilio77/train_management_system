@@ -56,7 +56,7 @@ public class Train implements Serializable {
     }
 
     public int getCapacity() {
-        int[] capacity = {0};
+        int[] capacity = { 0 };
         wagons.forEach(wagon -> {
             if (wagon instanceof PassengerWagon) {
                 capacity[0] += ((PassengerWagon) wagon).getPassengerCount();
@@ -77,7 +77,7 @@ public class Train implements Serializable {
         return stack;
     }
 
-    public String getType(){
+    public String getType() {
         return type;
     }
 

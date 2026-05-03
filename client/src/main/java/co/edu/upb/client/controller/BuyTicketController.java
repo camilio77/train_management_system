@@ -15,13 +15,13 @@ import co.edu.upb.train_management_system.model.user.Passenger;
 
 public class BuyTicketController {
 
-    private final ClientModel   model;
+    private final ClientModel model;
     private final BuyTicketView view;
-    private final Passenger     passenger;
+    private final Passenger passenger;
 
     public BuyTicketController(ClientModel model, BuyTicketView view, Passenger passenger) {
-        this.model     = model;
-        this.view      = view;
+        this.model = model;
+        this.view = view;
         this.passenger = passenger;
 
         loadStations();
@@ -30,12 +30,13 @@ public class BuyTicketController {
 
     private void loadStations() {
         try {
-            // Cargar estaciones
             LinkedList<Station> estaciones = model.getStationService().getAll();
             List<String> nombresList = new ArrayList<>();
-            estaciones.forEach(s -> { nombresList.add(s.getName()); return null; });
+            estaciones.forEach(s -> {
+                nombresList.add(s.getName());
+                return null;
+            });
 
-            // Cargar rutas para dibujar conexiones en el mapa
             LinkedList<Route> rutas = model.getRouteService().getAll();
             List<int[]> connections = new ArrayList<>();
             rutas.forEach(r -> {
@@ -43,8 +44,9 @@ public class BuyTicketController {
                 String dName = r.getDestinationName();
                 int idxA = nombresList.indexOf(oName);
                 int idxB = nombresList.indexOf(dName);
-                if (idxA >= 0 && idxB >= 0)
+                if (idxA >= 0 && idxB >= 0) {
                     connections.add(new int[]{idxA, idxB});
+                }
                 return null;
             });
 
@@ -57,11 +59,11 @@ public class BuyTicketController {
     }
 
     private void handleBuy() {
-        String origen    = view.getOrigen();
-        String destino   = view.getDestino();
+        String origen = view.getOrigen();
+        String destino = view.getDestino();
         String categoria = view.getCategoria();
-        double peso1     = view.getPesoEquipaje1();
-        double peso2     = view.getPesoEquipaje2();
+        double peso1 = view.getPesoEquipaje1();
+        double peso2 = view.getPesoEquipaje2();
 
         if (origen == null || destino == null) {
             view.showError("Selecciona origen y destino en el mapa.");
@@ -77,7 +79,6 @@ public class BuyTicketController {
         }
 
         try {
-            // Verificar que exista una ruta entre origen y destino
             final Route[] rutaEncontrada = {null};
             model.getRouteService().getAll().forEach(r -> {
                 if (rutaEncontrada[0] == null
@@ -92,37 +93,36 @@ public class BuyTicketController {
 
             if (rutaEncontrada[0] == null) {
                 view.showError("No existe una ruta directa entre\n"
-                    + origen + " → " + destino
-                    + "\nVerifica que haya una ruta registrada con ese origen y destino.");
+                        + origen + " → " + destino
+                        + "\nVerifica que haya una ruta registrada con ese origen y destino.");
                 return;
             }
 
-            // Resaltar en el mapa
             List<String> pathList = new ArrayList<>();
             pathList.add(origen);
             pathList.add(destino);
             view.highlightPath(pathList);
 
-            // Confirmar
             int confirm = JOptionPane.showConfirmDialog(null,
-                "Ruta: " + origen + " → " + destino +
-                "\nTren: " + rutaEncontrada[0].getTrainName() +
-                "\nCategoría: " + categoria +
-                (peso1 > 0 ? "\nMaleta 1: " + peso1 + " kg" : "") +
-                (peso2 > 0 ? "\nMaleta 2: " + peso2 + " kg" : "") +
-                "\n\n¿Confirmar compra?",
-                "Confirmar compra", JOptionPane.YES_NO_OPTION);
+                    "Ruta: " + origen + " → " + destino
+                    + "\nTren: " + rutaEncontrada[0].getTrainName()
+                    + "\nCategoría: " + categoria
+                    + (peso1 > 0 ? "\nMaleta 1: " + peso1 + " kg" : "")
+                    + (peso2 > 0 ? "\nMaleta 2: " + peso2 + " kg" : "")
+                    + "\n\n¿Confirmar compra?",
+                    "Confirmar compra", JOptionPane.YES_NO_OPTION);
 
-            if (confirm != JOptionPane.YES_OPTION) return;
+            if (confirm != JOptionPane.YES_OPTION) {
+                return;
+            }
 
-            // Comprar — usa nombres de estación directamente como pide TicketInterface
             double pesoTotal = peso1 + peso2;
             LinkedList<Ticket> tickets = model.getTicketService().buyTickets(
-                passenger.getIdentificacion(),
-                origen,
-                destino,
-                categoria,
-                pesoTotal
+                    passenger.getIdentificacion(),
+                    origen,
+                    destino,
+                    categoria,
+                    pesoTotal
             );
 
             if (tickets == null || tickets.isEmpty()) {
@@ -130,19 +130,19 @@ public class BuyTicketController {
                 return;
             }
 
-            // Resumen
             StringBuilder sb = new StringBuilder();
             sb.append("¡Compra exitosa! ").append(tickets.size()).append(" ticket(s):\n\n");
             tickets.forEach(t -> {
                 sb.append("Ticket #").append(t.getId())
-                  .append(" | Asiento ").append(t.getNumeroAsiento())
-                  .append(" | $").append(
-                      String.format("%,d", (long) t.getTotal()).replace(",", "."))
-                  .append("\n");
+                        .append(" | Asiento ").append(t.getNumeroAsiento())
+                        .append(" | $").append(
+                        String.format("%,d", (long) t.getTotal()).replace(",", "."))
+                        .append("\n");
                 return null;
             });
-            if (pesoTotal > 0)
+            if (pesoTotal > 0) {
                 sb.append("\nEquipaje total: ").append(pesoTotal).append(" kg");
+            }
 
             view.showSuccess(sb.toString());
             view.close();

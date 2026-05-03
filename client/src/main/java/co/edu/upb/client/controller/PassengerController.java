@@ -10,13 +10,13 @@ import co.edu.upb.train_management_system.model.user.Passenger;
 
 public class PassengerController {
 
-    private final ClientModel        model;
+    private final ClientModel model;
     private final PassengerPanelView view;
-    private       Passenger          passenger;
+    private Passenger passenger;
 
     public PassengerController(ClientModel model, PassengerPanelView view, Passenger passenger) {
-        this.model     = model;
-        this.view      = view;
+        this.model = model;
+        this.view = view;
         this.passenger = passenger;
 
         reloadRoutes();
@@ -47,10 +47,10 @@ public class PassengerController {
             view.clearRoutes();
             model.getRouteService().getAll().forEach(r -> {
                 view.addRoute(
-                    r.getId(), r.getTrainName(),
-                    r.getOriginName(), r.getDestinationName(),
-                    r.getDateOfLeaving() != null ? r.getDateOfLeaving().toString() : "—",
-                    r.getDateOfArrival()  != null ? r.getDateOfArrival().toString() : "—"
+                        r.getId(), r.getTrainName(),
+                        r.getOriginName(), r.getDestinationName(),
+                        r.getDateOfLeaving() != null ? r.getDateOfLeaving().toString() : "—",
+                        r.getDateOfArrival() != null ? r.getDateOfArrival().toString() : "—"
                 );
                 return null;
             });
@@ -63,19 +63,21 @@ public class PassengerController {
         try {
             view.clearTickets();
             LinkedList<Ticket> tickets = model.getTicketService()
-                .getTicketsByPassenger(passenger.getIdentificacion());
+                    .getTicketsByPassenger(passenger.getIdentificacion());
 
             boolean[] tieneActivo = {false};
             tickets.forEach(t -> {
-                if (t.isStatus()) tieneActivo[0] = true;
+                if (t.isStatus()) {
+                    tieneActivo[0] = true;
+                }
                 view.addTicket(
-                    String.valueOf(t.getId()),
-                    t.getRoutes().length > 0 ? t.getRoutes()[0].getOriginName()      : "—",
-                    t.getRoutes().length > 0 ? t.getRoutes()[0].getDestinationName() : "—",
-                    t.getCategory(),
-                    "$" + String.format("%,d", (long) t.getTotal()).replace(",", "."),
-                    String.valueOf(t.getNumeroAsiento()),
-                    t.isStatus() ? "✅ Activo" : "❌ Cancelado"
+                        String.valueOf(t.getId()),
+                        t.getRoutes().length > 0 ? t.getRoutes()[0].getOriginName() : "—",
+                        t.getRoutes().length > 0 ? t.getRoutes()[0].getDestinationName() : "—",
+                        t.getCategory(),
+                        "$" + String.format("%,d", (long) t.getTotal()).replace(",", "."),
+                        String.valueOf(t.getNumeroAsiento()),
+                        t.isStatus() ? "✅ Activo" : "❌ Cancelado"
                 );
                 return null;
             });
@@ -87,26 +89,27 @@ public class PassengerController {
 
     private void handleEditProfile() {
         PassengerPanelView.ProfileData data = view.showEditProfileDialog(
-            passenger.getFullName().split(" ", 2)[0],
-            passenger.getFullName().split(" ", 2).length > 1
+                passenger.getFullName().split(" ", 2)[0],
+                passenger.getFullName().split(" ", 2).length > 1
                 ? passenger.getFullName().split(" ", 2)[1] : "",
-            passenger.getIdentificationType(),
-            passenger.getAddress()
+                passenger.getIdentificationType(),
+                passenger.getAddress()
         );
-        if (data == null) return;
+        if (data == null) {
+            return;
+        }
 
         try {
             model.getUserService().updatePassenger(
-                passenger.getIdentificacion(),
-                data.nombres, data.apellidos,
-                data.tipoId, data.direccion
+                    passenger.getIdentificacion(),
+                    data.nombres, data.apellidos,
+                    data.tipoId, data.direccion
             );
-            // Refrescar objeto local
             passenger = new Passenger(
-                passenger.getIdentificacion(),
-                data.nombres, data.apellidos,
-                data.tipoId, data.direccion,
-                passenger.getPassword()
+                    passenger.getIdentificacion(),
+                    data.nombres, data.apellidos,
+                    data.tipoId, data.direccion,
+                    passenger.getPassword()
             );
             view.updateName(data.nombres + " " + data.apellidos);
             view.showSuccess("Perfil actualizado correctamente.");

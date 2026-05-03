@@ -33,7 +33,7 @@ public class ServerView extends Observer {
     public ServerView(String title, Subject subject) {
         super(subject);
         this.title = title;
-        buildComponents();   // inicializa todo aquí, sin depender del .form
+        buildComponents();
     }
 
     private void buildComponents() {
@@ -47,8 +47,7 @@ public class ServerView extends Observer {
         console.setFont(new Font("Monospaced", Font.PLAIN, 13));
         console.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(180, 180, 180)),
-                BorderFactory.createEmptyBorder(6, 8, 6, 8)
-        ));
+                BorderFactory.createEmptyBorder(6, 8, 6, 8)));
         panelConsole.add(console, BorderLayout.CENTER);
 
         // Panel botones
@@ -68,14 +67,14 @@ public class ServerView extends Observer {
         panelButton.add(button);
         panelButton.add(stopButton);
 
-        // Panel principal
         mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(panelConsole, BorderLayout.CENTER);
         mainPanel.add(panelButton, BorderLayout.SOUTH);
     }
 
     public void initComponents(UnaryOperator<Void> onStart, UnaryOperator<Void> onStop) {
-        if (GraphicsEnvironment.isHeadless()) return;
+        if (GraphicsEnvironment.isHeadless())
+            return;
 
         if (frame == null) {
             frame = new JFrame(title);

@@ -43,7 +43,6 @@ public class LoginClientView {
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
 
-        // ── Panel izquierdo ───────────────────────────────────────
         JPanel left = new JPanel(new BorderLayout());
         left.setBackground(new Color(30, 58, 95));
         left.setPreferredSize(new Dimension(380, 550));
@@ -71,7 +70,6 @@ public class LoginClientView {
         leftContent.add(appSub);
         left.add(leftContent, BorderLayout.CENTER);
 
-        // ── Panel derecho — formulario ────────────────────────────
         JPanel right = new JPanel(new GridBagLayout());
         right.setBackground(new Color(245, 247, 250));
         right.setBorder(new EmptyBorder(40, 50, 40, 50));
@@ -129,7 +127,6 @@ public class LoginClientView {
         frame.setVisible(true);
     }
 
-    // ── Métodos para que el controller enlace acciones ────────────
 
     public void onLogin(BiConsumer<String, String> handler) {
         btnLogin.addActionListener(e -> {
@@ -137,7 +134,6 @@ public class LoginClientView {
             String pwd = new String(fieldPassword.getPassword());
             handler.accept(id, pwd);
         });
-        // Enter en password también dispara login
         fieldPassword.addActionListener(e -> {
             String id  = fieldId.getText().trim();
             String pwd = new String(fieldPassword.getPassword());
@@ -152,7 +148,6 @@ public class LoginClientView {
     public void showError(String msg)   { labelError.setText(msg); }
     public void close()                 { frame.dispose(); }
 
-    // ── Helpers de estilo ─────────────────────────────────────────
 
     private JLabel label(String text, int size, int style, Color color) {
         JLabel lbl = new JLabel(text);

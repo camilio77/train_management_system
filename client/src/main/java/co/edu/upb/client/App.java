@@ -4,6 +4,7 @@ import co.edu.upb.client.controller.ClientController;
 import co.edu.upb.client.factory.ClientFactory;
 
 public class App {
+
     public static void main(String[] args) {
         System.setProperty("java.net.preferIPv4Stack", "true");
         try {

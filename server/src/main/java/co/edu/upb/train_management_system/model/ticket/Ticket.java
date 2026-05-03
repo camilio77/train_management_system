@@ -134,6 +134,12 @@ public class Ticket implements Serializable {
         return true;
     }
 
-    public int getNumeroAsiento() { return numeroAsiento; }
-    public boolean setNumeroAsiento(int n) { this.numeroAsiento = n; return true; }
+    public int getNumeroAsiento() {
+        return numeroAsiento;
+    }
+
+    public boolean setNumeroAsiento(int n) {
+        this.numeroAsiento = n;
+        return true;
+    }
 }

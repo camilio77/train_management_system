@@ -20,7 +20,8 @@ public class Passenger extends AbstractUser implements Serializable {
         this.emergencyContacts = new LinkedList<>();
     }
 
-    public Passenger(String identificacion, String names, String lastNames, String identificationType, String address, String password) {
+    public Passenger(String identificacion, String names, String lastNames, String identificationType, String address,
+            String password) {
         super(identificacion, names, lastNames, identificationType);
         this.address = address;
         setPassword(password);
@@ -55,13 +56,13 @@ public class Passenger extends AbstractUser implements Serializable {
         return emergencyContacts.toArray();
     }
 
-    public boolean addEmergencyContact(EmergencyContact emergencyContact){
+    public boolean addEmergencyContact(EmergencyContact emergencyContact) {
         return emergencyContacts.add(emergencyContact);
     }
 
-    public boolean deleteEmergencyContact(String idContact){
+    public boolean deleteEmergencyContact(String idContact) {
         emergencyContacts.forEach(e -> {
-            if (e.getIdentificacion() == idContact){
+            if (e.getIdentificacion() == idContact) {
                 emergencyContacts.remove(e);
             }
             return null;
@@ -69,9 +70,9 @@ public class Passenger extends AbstractUser implements Serializable {
         return true;
     }
 
-    public boolean modifyEmergencyContact(String idContact, EmergencyContact newContact){
+    public boolean modifyEmergencyContact(String idContact, EmergencyContact newContact) {
         emergencyContacts.forEach(e -> {
-            if (e.getIdentificacion() == idContact){
+            if (e.getIdentificacion() == idContact) {
                 emergencyContacts.replace(e, newContact, t -> t.getIdentificacion() == idContact);
             }
             return null;
@@ -79,7 +80,7 @@ public class Passenger extends AbstractUser implements Serializable {
         return true;
     }
 
-    public boolean addCurrentTicketToPrevious(){
+    public boolean addCurrentTicketToPrevious() {
         previousTickets.add(currentTicket);
         currentTicket = null;
         return true;

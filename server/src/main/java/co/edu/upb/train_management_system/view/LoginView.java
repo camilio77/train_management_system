@@ -69,7 +69,6 @@ public class LoginView {
 
         left.add(leftContent, BorderLayout.CENTER);
 
-        // Panel derecho — formulario
         JPanel right = new JPanel();
         right.setBackground(new Color(245, 247, 250));
         right.setLayout(new GridBagLayout());
@@ -90,7 +89,6 @@ public class LoginView {
         loginSubtitle.setForeground(new Color(120, 130, 145));
         loginSubtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Campo ID
         JLabel lblId = new JLabel("Identificación");
         lblId.setFont(new Font("Arial", Font.BOLD, 12));
         lblId.setForeground(new Color(60, 70, 85));
@@ -102,10 +100,8 @@ public class LoginView {
         fieldId.setAlignmentX(Component.LEFT_ALIGNMENT);
         fieldId.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 210, 220)),
-                new EmptyBorder(6, 10, 6, 10)
-        ));
+                new EmptyBorder(6, 10, 6, 10)));
 
-        // Campo password
         JLabel lblPass = new JLabel("Contraseña");
         lblPass.setFont(new Font("Arial", Font.BOLD, 12));
         lblPass.setForeground(new Color(60, 70, 85));
@@ -117,10 +113,8 @@ public class LoginView {
         fieldPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
         fieldPassword.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 210, 220)),
-                new EmptyBorder(6, 10, 6, 10)
-        ));
+                new EmptyBorder(6, 10, 6, 10)));
 
-        // Botón login
         JButton btnLogin = new JButton("Ingresar");
         btnLogin.setFont(new Font("Arial", Font.BOLD, 14));
         btnLogin.setBackground(new Color(30, 58, 95));
@@ -131,7 +125,6 @@ public class LoginView {
         btnLogin.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
         btnLogin.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Separador
         JPanel divider = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
         divider.setOpaque(false);
         divider.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -140,7 +133,6 @@ public class LoginView {
         orLabel.setForeground(new Color(120, 130, 145));
         divider.add(orLabel);
 
-        // Botón register
         JButton btnRegister = new JButton("Registrarse");
         btnRegister.setFont(new Font("Arial", Font.BOLD, 13));
         btnRegister.setForeground(new Color(30, 58, 95));
@@ -148,19 +140,16 @@ public class LoginView {
         btnRegister.setFocusPainted(false);
         btnRegister.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(30, 58, 95)),
-                new EmptyBorder(8, 0, 8, 0)
-        ));
+                new EmptyBorder(8, 0, 8, 0)));
         btnRegister.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnRegister.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         btnRegister.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Label error
         labelError = new JLabel(" ", SwingConstants.LEFT);
         labelError.setFont(new Font("Arial", Font.PLAIN, 12));
         labelError.setForeground(new Color(200, 50, 50));
         labelError.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Armar formulario
         form.add(loginTitle);
         form.add(Box.createVerticalStrut(4));
         form.add(loginSubtitle);
@@ -183,7 +172,6 @@ public class LoginView {
 
         right.add(form);
 
-        // Acciones
         btnLogin.addActionListener(e -> handleLogin());
         fieldPassword.addActionListener(e -> handleLogin()); // Enter en password
         btnRegister.addActionListener(e -> {

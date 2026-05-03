@@ -45,11 +45,10 @@ public class Environment {
         try {
             String basePath = System.getProperty("user.dir");
 
-            File configFile = new File(basePath + File.separator +
-                    "server" + File.separator +
-                    "config.properties");
+            File configFile = new File(basePath + File.separator
+                    + "server" + File.separator
+                    + "config.properties");
 
-            // Si no existe en /server/, intenta en la raíz del proyecto
             if (!configFile.exists()) {
                 configFile = new File(basePath + File.separator + "config.properties");
             }

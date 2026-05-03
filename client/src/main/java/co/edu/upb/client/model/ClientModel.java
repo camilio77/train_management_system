@@ -15,7 +15,6 @@ public class ClientModel extends Subject {
 
     private String logger;
 
-    // URIs
     private final String ticketUri;
     private final String userUri;
     private final String trainUri;
@@ -24,34 +23,33 @@ public class ClientModel extends Subject {
     private final String wagonUri;
     private final String stationGraphUri;
 
-    // Servicios remotos
-    private TicketInterface       ticketService;
-    private UserInterface         userService;
-    private TrainInterface        trainService;
-    private StationInterface      stationService;
-    private RouteInterface        routeService;
-    private WagonInterface        wagonService;
+    private TicketInterface ticketService;
+    private UserInterface userService;
+    private TrainInterface trainService;
+    private StationInterface stationService;
+    private RouteInterface routeService;
+    private WagonInterface wagonService;
     private StationGraphInterface stationGraphService;
 
     public ClientModel(String ip, int port, String serviceName) {
         String base = "rmi://" + ip + ":" + port + "/" + serviceName;
-        this.ticketUri       = base;
-        this.userUri         = base + "-users";
-        this.trainUri        = base + "-trains";
-        this.stationUri      = base + "-stations";
-        this.routeUri        = base + "-routes";
-        this.wagonUri        = base + "-wagons";
+        this.ticketUri = base;
+        this.userUri = base + "-users";
+        this.trainUri = base + "-trains";
+        this.stationUri = base + "-stations";
+        this.routeUri = base + "-routes";
+        this.wagonUri = base + "-wagons";
         this.stationGraphUri = base + "-station-graph";
     }
 
     public boolean connect() {
         try {
-            ticketService       = (TicketInterface)       Naming.lookup(ticketUri);
-            userService         = (UserInterface)         Naming.lookup(userUri);
-            trainService        = (TrainInterface)        Naming.lookup(trainUri);
-            stationService      = (StationInterface)      Naming.lookup(stationUri);
-            routeService        = (RouteInterface)        Naming.lookup(routeUri);
-            wagonService        = (WagonInterface)        Naming.lookup(wagonUri);
+            ticketService = (TicketInterface) Naming.lookup(ticketUri);
+            userService = (UserInterface) Naming.lookup(userUri);
+            trainService = (TrainInterface) Naming.lookup(trainUri);
+            stationService = (StationInterface) Naming.lookup(stationUri);
+            routeService = (RouteInterface) Naming.lookup(routeUri);
+            wagonService = (WagonInterface) Naming.lookup(wagonUri);
             stationGraphService = (StationGraphInterface) Naming.lookup(stationGraphUri);
 
             this.logger = "Conectado al servidor en: " + ticketUri;
@@ -66,26 +64,51 @@ public class ClientModel extends Subject {
     }
 
     public boolean disconnect() {
-        ticketService       = null;
-        userService         = null;
-        trainService        = null;
-        stationService      = null;
-        routeService        = null;
-        wagonService        = null;
+        ticketService = null;
+        userService = null;
+        trainService = null;
+        stationService = null;
+        routeService = null;
+        wagonService = null;
         stationGraphService = null;
         this.logger = "Desconectado del servidor.";
         this.notifyObservers();
         return true;
     }
 
-    public boolean isConnected() { return ticketService != null; }
+    public boolean isConnected() {
+        return ticketService != null;
+    }
 
-    public TicketInterface       getTicketService()       { return ticketService; }
-    public UserInterface         getUserService()         { return userService; }
-    public TrainInterface        getTrainService()        { return trainService; }
-    public StationInterface      getStationService()      { return stationService; }
-    public RouteInterface        getRouteService()        { return routeService; }
-    public WagonInterface        getWagonService()        { return wagonService; }
-    public StationGraphInterface getStationGraphService() { return stationGraphService; }
-    public String                getLogger()              { return logger; }
+    public TicketInterface getTicketService() {
+        return ticketService;
+    }
+
+    public UserInterface getUserService() {
+        return userService;
+    }
+
+    public TrainInterface getTrainService() {
+        return trainService;
+    }
+
+    public StationInterface getStationService() {
+        return stationService;
+    }
+
+    public RouteInterface getRouteService() {
+        return routeService;
+    }
+
+    public WagonInterface getWagonService() {
+        return wagonService;
+    }
+
+    public StationGraphInterface getStationGraphService() {
+        return stationGraphService;
+    }
+
+    public String getLogger() {
+        return logger;
+    }
 }

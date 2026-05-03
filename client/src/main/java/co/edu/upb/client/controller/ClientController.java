@@ -11,7 +11,7 @@ public class ClientController extends Observer {
     private final ClientView view;
 
     public ClientController(ClientModel model, ClientView view) {
-        super(model);          // se suscribe al Subject (ClientModel)
+        super(model);
         this.model = model;
         this.view = view;
     }
@@ -22,7 +22,6 @@ public class ClientController extends Observer {
                     boolean ok = model.connect();
                     if (ok) {
                         view.onConnected();
-                        // Abre el login una vez conectado
                         LoginClientView loginView = new LoginClientView();
                         new LoginController(model, loginView);
                     } else {

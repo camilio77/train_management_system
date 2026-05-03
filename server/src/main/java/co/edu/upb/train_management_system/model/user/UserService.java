@@ -1,18 +1,25 @@
 package co.edu.upb.train_management_system.model.user;
 
-import co.edu.upb.app.LinkedList.singly.LinkedList;
-import co.edu.upb.train_management_system.DataBase.DatabaseConnection;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import co.edu.upb.app.LinkedList.singly.LinkedList;
+import co.edu.upb.train_management_system.DataBase.DatabaseConnection;
 
 public class UserService extends UnicastRemoteObject implements UserInterface {
     private static UserService instance;
 
-    protected UserService() throws RemoteException { super(); }
+    protected UserService() throws RemoteException {
+        super();
+    }
 
     public static UserService getInstance() throws RemoteException {
-        if (instance == null) instance = new UserService();
+        if (instance == null)
+            instance = new UserService();
         return instance;
     }
 
@@ -21,7 +28,8 @@ public class UserService extends UnicastRemoteObject implements UserInterface {
         Connection conn = DatabaseConnection.getConnection();
         PreparedStatement stmt = conn.prepareStatement(
                 "SELECT * FROM usuario WHERE identificacion=? AND contrasena=? AND tipo IN ('ADMINISTRADOR','EMPLEADO')");
-        stmt.setString(1, identificacion); stmt.setString(2, contrasena);
+        stmt.setString(1, identificacion);
+        stmt.setString(2, contrasena);
         ResultSet rs = stmt.executeQuery();
         if (rs.next()) {
             String tipo = rs.getString("tipo");
@@ -41,9 +49,12 @@ public class UserService extends UnicastRemoteObject implements UserInterface {
         PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO usuario (identificacion, nombres, apellidos, contrasena, tipo, tipo_identificacion, direccion) VALUES (?, ?, ?, ?, 'PASAJERO', ?, ?)");
         String[] parts = passenger.getFullName().split(" ", 2);
-        stmt.setString(1, passenger.getIdentificacion()); stmt.setString(2, parts[0]);
-        stmt.setString(3, parts.length > 1 ? parts[1] : ""); stmt.setString(4, passenger.getPassword());
-        stmt.setString(5, passenger.getIdentificationType()); stmt.setString(6, passenger.getAddress());
+        stmt.setString(1, passenger.getIdentificacion());
+        stmt.setString(2, parts[0]);
+        stmt.setString(3, parts.length > 1 ? parts[1] : "");
+        stmt.setString(4, passenger.getPassword());
+        stmt.setString(5, passenger.getIdentificationType());
+        stmt.setString(6, passenger.getAddress());
         stmt.executeUpdate();
         return true;
     }
@@ -63,11 +74,14 @@ public class UserService extends UnicastRemoteObject implements UserInterface {
 
     @Override
     public boolean updatePassenger(String id, String nombres, String apellidos,
-                                   String tipoId, String direccion) throws Exception {
+            String tipoId, String direccion) throws Exception {
         PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(
                 "UPDATE usuario SET nombres=?, apellidos=?, tipo_identificacion=?, direccion=? WHERE identificacion=? AND tipo='PASAJERO'");
-        stmt.setString(1, nombres); stmt.setString(2, apellidos);
-        stmt.setString(3, tipoId);  stmt.setString(4, direccion); stmt.setString(5, id);
+        stmt.setString(1, nombres);
+        stmt.setString(2, apellidos);
+        stmt.setString(3, tipoId);
+        stmt.setString(4, direccion);
+        stmt.setString(5, id);
         stmt.executeUpdate();
         return true;
     }
@@ -87,8 +101,10 @@ public class UserService extends UnicastRemoteObject implements UserInterface {
         PreparedStatement stmt = conn.prepareStatement(
                 "INSERT INTO usuario (identificacion, nombres, apellidos, contrasena, tipo, tipo_identificacion) VALUES (?, ?, ?, ?, 'EMPLEADO', ?)");
         String[] parts = employee.getFullName().split(" ", 2);
-        stmt.setString(1, employee.getIdentificacion()); stmt.setString(2, parts[0]);
-        stmt.setString(3, parts.length > 1 ? parts[1] : ""); stmt.setString(4, employee.getPassword());
+        stmt.setString(1, employee.getIdentificacion());
+        stmt.setString(2, parts[0]);
+        stmt.setString(3, parts.length > 1 ? parts[1] : "");
+        stmt.setString(4, employee.getPassword());
         stmt.setString(5, employee.getIdentificationType());
         stmt.executeUpdate();
         return true;
@@ -109,19 +125,24 @@ public class UserService extends UnicastRemoteObject implements UserInterface {
     public boolean updateEmployee(String id, String nombres, String apellidos, String tipoId) throws Exception {
         PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(
                 "UPDATE usuario SET nombres=?, apellidos=?, tipo_identificacion=? WHERE identificacion=? AND tipo='EMPLEADO'");
-        stmt.setString(1, nombres); stmt.setString(2, apellidos);
-        stmt.setString(3, tipoId);  stmt.setString(4, id);
+        stmt.setString(1, nombres);
+        stmt.setString(2, apellidos);
+        stmt.setString(3, tipoId);
+        stmt.setString(4, id);
         stmt.executeUpdate();
         return true;
     }
 
     @Override
     public boolean updateAdmin(String id, String nombres, String apellidos,
-                               String tipoId, String pass) throws Exception {
+            String tipoId, String pass) throws Exception {
         PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(
                 "UPDATE usuario SET nombres=?, apellidos=?, tipo_identificacion=?, contrasena=? WHERE identificacion=? AND tipo='ADMINISTRADOR'");
-        stmt.setString(1, nombres); stmt.setString(2, apellidos);
-        stmt.setString(3, tipoId);  stmt.setString(4, pass); stmt.setString(5, id);
+        stmt.setString(1, nombres);
+        stmt.setString(2, apellidos);
+        stmt.setString(3, tipoId);
+        stmt.setString(4, pass);
+        stmt.setString(5, id);
         stmt.executeUpdate();
         return true;
     }
@@ -142,8 +163,7 @@ public class UserService extends UnicastRemoteObject implements UserInterface {
                         rs.getString("apellidos"),
                         rs.getString("tipo_identificacion"),
                         rs.getString("direccion") != null ? rs.getString("direccion") : "",
-                        rs.getString("contrasena")
-                );
+                        rs.getString("contrasena"));
             }
             return null;
         } catch (SQLException e) {

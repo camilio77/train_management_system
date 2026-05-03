@@ -1,15 +1,19 @@
 package co.edu.upb.train_management_system.model.station;
 
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import co.edu.upb.app.GraphPrototipe.MatrixGraph;
 import co.edu.upb.app.LinkedList.singly.LinkedList;
 import co.edu.upb.train_management_system.DataBase.DatabaseConnection;
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
-import java.sql.*;
 
 public class StationGraphService extends UnicastRemoteObject implements StationGraphInterface {
     private static StationGraphService instance;
-    private MatrixGraph<String> graph; // vértices = nombres de estación
+    private MatrixGraph<String> graph;
 
     protected StationGraphService() throws RemoteException {
         super();
@@ -17,34 +21,32 @@ public class StationGraphService extends UnicastRemoteObject implements StationG
     }
 
     public static StationGraphService getInstance() throws RemoteException {
-        if (instance == null) instance = new StationGraphService();
+        if (instance == null)
+            instance = new StationGraphService();
         return instance;
     }
 
-    // Carga estaciones y conexiones desde la BD al grafo
     @Override
     public void loadGraph() throws RemoteException {
         try {
             graph = new MatrixGraph<>(50);
             Connection conn = DatabaseConnection.getConnection();
 
-            // 1. Cargar todas las estaciones como vértices
             ResultSet rsEstaciones = conn.createStatement()
                     .executeQuery("SELECT nombre FROM estacion ORDER BY id_estacion");
             while (rsEstaciones.next())
                 graph.nuevoVertice(rsEstaciones.getString("nombre"));
 
-            // 2. Cargar conexiones ponderadas por distancia_km
             ResultSet rsConexiones = conn.createStatement().executeQuery("""
-                SELECT e1.nombre AS origen, e2.nombre AS destino, c.distancia_km
-                FROM conexion_estacion c
-                JOIN estacion e1 ON c.id_estacion_origen  = e1.id_estacion
-                JOIN estacion e2 ON c.id_estacion_destino = e2.id_estacion
-                """);
+                    SELECT e1.nombre AS origen, e2.nombre AS destino, c.distancia_km
+                    FROM conexion_estacion c
+                    JOIN estacion e1 ON c.id_estacion_origen  = e1.id_estacion
+                    JOIN estacion e2 ON c.id_estacion_destino = e2.id_estacion
+                    """);
             while (rsConexiones.next()) {
-                String origen  = rsConexiones.getString("origen");
+                String origen = rsConexiones.getString("origen");
                 String destino = rsConexiones.getString("destino");
-                int    km      = rsConexiones.getInt("distancia_km");
+                int km = rsConexiones.getInt("distancia_km");
                 try {
                     graph.newEdge(origen, destino, km);
                 } catch (Exception e) {
@@ -57,7 +59,6 @@ public class StationGraphService extends UnicastRemoteObject implements StationG
         }
     }
 
-    // Retorna el camino más corto entre dos estaciones (nombres)
     @Override
     public LinkedList<String> shortestPath(String origen, String destino) throws RemoteException {
         try {
@@ -67,63 +68,58 @@ public class StationGraphService extends UnicastRemoteObject implements StationG
         }
     }
 
-    // Retorna la distancia total entre dos estaciones
     @Override
     public int shortestDistance(String origen, String destino) throws RemoteException {
         try {
             LinkedList<String> path = graph.dijkstra(origen, destino);
-            if (path.isEmpty()) return -1;
+            if (path.isEmpty())
+                return -1;
 
             String[] nodos = (String[]) path.toArray();
             int total = 0;
             for (int i = 0; i < nodos.length - 1; i++)
                 total += graph.getEdgeWeight(
                         graph.numVertice(nodos[i]),
-                        graph.numVertice(nodos[i + 1])
-                );
+                        graph.numVertice(nodos[i + 1]));
             return total;
         } catch (Exception e) {
             throw new RemoteException("Error calculando distancia: " + e.getMessage());
         }
     }
 
-    // Agrega una conexión nueva a la BD y al grafo en memoria
     @Override
     public void addConnection(String idOrigen, String idDestino, double distanciaKm)
             throws RemoteException {
         try {
             Connection conn = DatabaseConnection.getConnection();
 
-            String nombreOrigen  = getStationName(conn, idOrigen);
+            String nombreOrigen = getStationName(conn, idOrigen);
             String nombreDestino = getStationName(conn, idDestino);
 
             if (nombreOrigen == null || nombreDestino == null) {
                 throw new RemoteException("Una de las estaciones no existe en la BD.");
             }
 
-            // ← Agregar vértices al grafo si aún no existen
             if (graph.numVertice(nombreOrigen) < 0)
                 graph.nuevoVertice(nombreOrigen);
             if (graph.numVertice(nombreDestino) < 0)
                 graph.nuevoVertice(nombreDestino);
 
-            // Guardar en BD
             PreparedStatement stmt = conn.prepareStatement("""
-            INSERT INTO conexion_estacion (id_estacion_origen, id_estacion_destino, distancia_km)
-            VALUES (?, ?, ?)
-            ON CONFLICT (id_estacion_origen, id_estacion_destino) DO UPDATE
-            SET distancia_km = EXCLUDED.distancia_km
-            """);
+                    INSERT INTO conexion_estacion (id_estacion_origen, id_estacion_destino, distancia_km)
+                    VALUES (?, ?, ?)
+                    ON CONFLICT (id_estacion_origen, id_estacion_destino) DO UPDATE
+                    SET distancia_km = EXCLUDED.distancia_km
+                    """);
             stmt.setInt(1, Integer.parseInt(idOrigen));
             stmt.setInt(2, Integer.parseInt(idDestino));
             stmt.setDouble(3, distanciaKm);
             stmt.executeUpdate();
 
-            // Actualizar grafo en memoria
-            // En addConnection(), justo antes de graph.newEdge():
             System.out.println("Vértices en grafo: " + graph.getNumVerts());
             System.out.println("Buscando origen: '" + nombreOrigen + "' → índice: " + graph.numVertice(nombreOrigen));
-            System.out.println("Buscando destino: '" + nombreDestino + "' → índice: " + graph.numVertice(nombreDestino));
+            System.out
+                    .println("Buscando destino: '" + nombreDestino + "' → índice: " + graph.numVertice(nombreDestino));
             graph.newEdge(nombreOrigen, nombreDestino, (int) distanciaKm);
 
         } catch (RemoteException e) {
@@ -138,15 +134,15 @@ public class StationGraphService extends UnicastRemoteObject implements StationG
         try {
             Connection conn = DatabaseConnection.getConnection();
             PreparedStatement stmt = conn.prepareStatement("""
-                DELETE FROM conexion_estacion
-                WHERE id_estacion_origen=? AND id_estacion_destino=?
-                """);
+                    DELETE FROM conexion_estacion
+                    WHERE id_estacion_origen=? AND id_estacion_destino=?
+                    """);
             stmt.setInt(1, Integer.parseInt(idOrigen));
             stmt.setInt(2, Integer.parseInt(idDestino));
             stmt.executeUpdate();
 
             // Actualizar grafo en memoria
-            String nombreOrigen  = getStationName(conn, idOrigen);
+            String nombreOrigen = getStationName(conn, idOrigen);
             String nombreDestino = getStationName(conn, idDestino);
             graph.deleteEdge(nombreOrigen, nombreDestino);
 
@@ -182,17 +178,17 @@ public class StationGraphService extends UnicastRemoteObject implements StationG
         try {
             LinkedList<String[]> list = new LinkedList<>();
             String sql = """
-            SELECT e1.id_estacion AS id_origen,  e1.nombre AS nombre_origen,
-                   e2.id_estacion AS id_destino, e2.nombre AS nombre_destino,
-                   c.distancia_km
-            FROM conexion_estacion c
-            JOIN estacion e1 ON c.id_estacion_origen  = e1.id_estacion
-            JOIN estacion e2 ON c.id_estacion_destino = e2.id_estacion
-            ORDER BY e1.nombre, e2.nombre
-            """;
+                    SELECT e1.id_estacion AS id_origen,  e1.nombre AS nombre_origen,
+                           e2.id_estacion AS id_destino, e2.nombre AS nombre_destino,
+                           c.distancia_km
+                    FROM conexion_estacion c
+                    JOIN estacion e1 ON c.id_estacion_origen  = e1.id_estacion
+                    JOIN estacion e2 ON c.id_estacion_destino = e2.id_estacion
+                    ORDER BY e1.nombre, e2.nombre
+                    """;
             ResultSet rs = DatabaseConnection.getConnection().createStatement().executeQuery(sql);
             while (rs.next()) {
-                list.add(new String[]{
+                list.add(new String[] {
                         rs.getString("id_origen"),
                         rs.getString("nombre_origen"),
                         rs.getString("id_destino"),
@@ -215,23 +211,21 @@ public class StationGraphService extends UnicastRemoteObject implements StationG
             while (rs.next())
                 list.add(new Station(
                         String.valueOf(rs.getInt("id_estacion")),
-                        rs.getString("nombre")
-                ));
+                        rs.getString("nombre")));
             return list;
         } catch (SQLException e) {
             throw new RemoteException("Error obteniendo estaciones: " + e.getMessage());
         }
     }
 
-    // Agrega en StationGraphService.java
     public LinkedList<Station> getConnectedStations(String idOrigen) throws SQLException {
         LinkedList<Station> list = new LinkedList<>();
         String sql = """
-        SELECT e.id_estacion, e.nombre
-        FROM conexion_estacion ce
-        JOIN estacion e ON ce.id_estacion_destino = e.id_estacion
-        WHERE ce.id_estacion_origen = ?
-        """;
+                SELECT e.id_estacion, e.nombre
+                FROM conexion_estacion ce
+                JOIN estacion e ON ce.id_estacion_destino = e.id_estacion
+                WHERE ce.id_estacion_origen = ?
+                """;
         PreparedStatement stmt = DatabaseConnection.getConnection().prepareStatement(sql);
         stmt.setInt(1, Integer.parseInt(idOrigen));
         ResultSet rs = stmt.executeQuery();

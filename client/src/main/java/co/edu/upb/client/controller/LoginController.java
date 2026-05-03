@@ -8,12 +8,12 @@ import co.edu.upb.train_management_system.model.user.Passenger;
 
 public class LoginController {
 
-    private final ClientModel     model;
+    private final ClientModel model;
     private final LoginClientView view;
 
     public LoginController(ClientModel model, LoginClientView view) {
         this.model = model;
-        this.view  = view;
+        this.view = view;
 
         view.onLogin((id, password) -> handleLogin(id, password));
         view.onRegister(() -> openRegister());
@@ -25,7 +25,6 @@ public class LoginController {
             return;
         }
         try {
-            // Busca directamente entre los pasajeros
             Passenger passenger = findPassenger(id, password);
 
             if (passenger != null) {
@@ -37,7 +36,6 @@ public class LoginController {
                 view.showError("Credenciales incorrectas.");
             }
         } catch (Exception ex) {
-            // Muestra el error real en vez de ocultarlo
             view.showError("Error: " + ex.getMessage());
             ex.printStackTrace();
         }

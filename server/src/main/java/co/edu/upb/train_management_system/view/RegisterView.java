@@ -48,7 +48,6 @@ public class RegisterView {
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
 
-        // Panel izquierdo — decorativo (mismo estilo que login)
         JPanel left = new JPanel(new BorderLayout());
         left.setBackground(new Color(30, 58, 95));
         left.setPreferredSize(new Dimension(320, 600));
@@ -76,7 +75,6 @@ public class RegisterView {
         leftContent.add(appSubtitle);
         left.add(leftContent, BorderLayout.CENTER);
 
-        // Panel derecho — formulario
         JPanel right = new JPanel();
         right.setBackground(new Color(245, 247, 250));
         right.setLayout(new GridBagLayout());
@@ -96,7 +94,6 @@ public class RegisterView {
         subtitle.setForeground(new Color(120, 130, 145));
         subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Campos en dos columnas
         JPanel fields = new JPanel(new GridLayout(0, 2, 16, 12));
         fields.setOpaque(false);
         fields.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -105,11 +102,10 @@ public class RegisterView {
         fieldNames = addField(fields, "Nombres");
         fieldLastNames = addField(fields, "Apellidos");
         fields.add(styledLabel("Tipo de identificación"));
-        fieldIdType = new JComboBox<>(new String[]{"CC", "TI", "CE"});
+        fieldIdType = new JComboBox<>(new String[] { "CC", "TI", "CE" });
         fields.add(fieldIdType);
         fieldAddress = addField(fields, "Dirección");
 
-        // Passwords van aparte para ocupar ancho completo
         JLabel lblPass = styledLabel("Contraseña");
         lblPass.setAlignmentX(Component.LEFT_ALIGNMENT);
         fieldPassword = new JPasswordField();
@@ -199,8 +195,7 @@ public class RegisterView {
         field.setPreferredSize(new Dimension(0, 34));
         field.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 210, 220)),
-                new EmptyBorder(5, 10, 5, 10)
-        ));
+                new EmptyBorder(5, 10, 5, 10)));
     }
 
     private void handleRegister() {
@@ -226,14 +221,12 @@ public class RegisterView {
         try {
             String identificacion = id;
             Passenger passenger = new Passenger(
-                    identificacion, names, lastNames, idType, address, password
-            );
+                    identificacion, names, lastNames, idType, address, password);
             UserService.getInstance().registerPassenger(passenger);
             JOptionPane.showMessageDialog(frame,
                     "¡Cuenta creada exitosamente!",
                     "Registro exitoso",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+                    JOptionPane.INFORMATION_MESSAGE);
             frame.dispose();
             new LoginView();
         } catch (NumberFormatException ex) {
@@ -242,4 +235,5 @@ public class RegisterView {
             labelError.setText("Error: " + ex.getMessage());
         }
     }
+
 }
