@@ -9,24 +9,21 @@ import co.edu.upb.train_management_system.model.user.AbstractUserWithPower;
 
 public class ValidatorController {
 
-    private final ValidatorModel        model;
-    private final ValidatorView         view;
+    private final ValidatorModel model;
+    private final ValidatorView view;
     private final AbstractUserWithPower user;
 
     public ValidatorController(ValidatorModel model, ValidatorView view,
-                               AbstractUserWithPower user) {
+            AbstractUserWithPower user) {
         this.model = model;
-        this.view  = view;
-        this.user  = user;
+        this.view = view;
+        this.user = user;
     }
 
-    /** Llamado desde App a través de ValidationFactory */
     public void init() {
         loadRoutes();
         bindEvents();
     }
-
-    // ------------------------------------------------------------------ //
 
     private void bindEvents() {
         view.onLoadRoutes(this::loadTicketsForSelectedRoute);
@@ -45,7 +42,8 @@ public class ValidatorController {
                 String label = r.getOriginName() + " → " + r.getDestinationName()
                         + " | " + r.getTrainName()
                         + " | " + (r.getDateOfLeaving() != null
-                                ? r.getDateOfLeaving().toString() : "—");
+                                ? r.getDateOfLeaving().toString()
+                                : "—");
                 view.addRouteOption(r.getId(), label);
                 return null;
             });
@@ -57,12 +55,12 @@ public class ValidatorController {
 
     private void loadTicketsForSelectedRoute() {
         String idRuta = view.getSelectedRouteId();
-        if (idRuta == null) return;
+        if (idRuta == null)
+            return;
 
         view.clearTickets();
         try {
-            LinkedList<Ticket> tickets =
-                    model.getTicketService().getTicketsByRoute(idRuta);
+            LinkedList<Ticket> tickets = model.getTicketService().getTicketsByRoute(idRuta);
 
             if (tickets.isEmpty()) {
                 view.showValidResult(false,
@@ -90,7 +88,7 @@ public class ValidatorController {
     }
 
     private void handleValidate() {
-        String idRuta   = view.getSelectedRouteId();
+        String idRuta = view.getSelectedRouteId();
         String idTicket = view.getTicketId();
 
         if (idRuta == null) {
@@ -103,8 +101,8 @@ public class ValidatorController {
         }
 
         try {
-            int idT   = Integer.parseInt(idTicket);
-            int idR   = Integer.parseInt(idRuta);
+            int idT = Integer.parseInt(idTicket);
+            int idR = Integer.parseInt(idRuta);
             boolean valid = model.getTicketService().validateTicket(idT, idR);
 
             if (valid) {

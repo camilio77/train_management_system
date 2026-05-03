@@ -23,11 +23,9 @@ public class ValidationFactory {
             throw new IllegalStateException("No se pudo conectar al servidor RMI.");
         }
 
-        // Arrancar siempre por el login, no por el ValidatorView
         LoginClientView loginView = new LoginClientView();
         LoginController loginCtrl = new LoginController(model, loginView);
 
-        // Retornar null porque el flujo continúa desde el LoginController
         return null;
     }
 }

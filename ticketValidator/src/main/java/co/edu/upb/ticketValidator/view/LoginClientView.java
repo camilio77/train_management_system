@@ -1,9 +1,26 @@
 package co.edu.upb.ticketValidator.view;
 
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagLayout;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.util.function.BiConsumer;
 
 public class LoginClientView {
     private JFrame frame;
@@ -55,7 +72,6 @@ public class LoginClientView {
         leftContent.add(appSub);
         left.add(leftContent, BorderLayout.CENTER);
 
-        // Panel derecho con formulario
         JPanel right = new JPanel(new GridBagLayout());
         right.setBackground(BG);
         right.setBorder(new EmptyBorder(40, 50, 40, 50));
@@ -65,22 +81,22 @@ public class LoginClientView {
         form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
 
         JLabel loginTitle = styledLabel("Iniciar Sesión", 22, Font.BOLD,
-            new Color(30, 58, 95));
+                new Color(30, 58, 95));
         loginTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel loginSub = styledLabel("Empleado o Administrador", 13, Font.PLAIN,
-            new Color(120, 130, 145));
+                new Color(120, 130, 145));
         loginSub.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lblId = styledLabel("Identificación", 12, Font.BOLD,
-            new Color(60, 70, 85));
+                new Color(60, 70, 85));
         lblId.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         fieldId = new JTextField();
         styleInput(fieldId);
 
         JLabel lblPass = styledLabel("Contraseña", 12, Font.BOLD,
-            new Color(60, 70, 85));
+                new Color(60, 70, 85));
         lblPass.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         fieldPassword = new JPasswordField();
@@ -136,8 +152,8 @@ public class LoginClientView {
         field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 38));
         ((JComponent) field).setAlignmentX(Component.LEFT_ALIGNMENT);
         field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 210, 220)),
-            new EmptyBorder(6, 10, 6, 10)));
+                BorderFactory.createLineBorder(new Color(200, 210, 220)),
+                new EmptyBorder(6, 10, 6, 10)));
     }
 
     public void onLogin(Runnable handler) {
@@ -145,9 +161,19 @@ public class LoginClientView {
         fieldPassword.addActionListener(e -> handler.run());
     }
 
-    public String getId()       { return fieldId.getText().trim(); }
-    public String getPassword() { return new String(fieldPassword.getPassword()); }
+    public String getId() {
+        return fieldId.getText().trim();
+    }
 
-    public void showError(String msg) { labelError.setText(msg); }
-    public void close()               { frame.dispose(); }
+    public String getPassword() {
+        return new String(fieldPassword.getPassword());
+    }
+
+    public void showError(String msg) {
+        labelError.setText(msg);
+    }
+
+    public void close() {
+        frame.dispose();
+    }
 }

@@ -1,9 +1,28 @@
 package co.edu.upb.ticketValidator.view;
 
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
 
 public class ValidatorView {
 
@@ -17,10 +36,10 @@ public class ValidatorView {
     private DefaultTableModel ticketsModel;
     private JTable ticketsTable;
 
-    private static final Color DARK_BLUE  = new Color(30, 58, 95);
-    private static final Color BG         = new Color(245, 247, 250);
-    private static final Color GREEN      = new Color(34, 139, 80);
-    private static final Color RED        = new Color(200, 50, 50);
+    private static final Color DARK_BLUE = new Color(30, 58, 95);
+    private static final Color BG = new Color(245, 247, 250);
+    private static final Color GREEN = new Color(34, 139, 80);
+    private static final Color RED = new Color(200, 50, 50);
 
     public ValidatorView(String userName) {
         frame = new JFrame("Validador de Tickets");
@@ -29,7 +48,6 @@ public class ValidatorView {
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
 
-        // ── Header ────────────────────────────────────────────────
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(DARK_BLUE);
         header.setBorder(new EmptyBorder(14, 24, 14, 24));
@@ -57,7 +75,6 @@ public class ValidatorView {
         header.add(title, BorderLayout.WEST);
         header.add(headerRight, BorderLayout.EAST);
 
-        // ── Panel superior: selección de ruta ─────────────────────
         JPanel routePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 10));
         routePanel.setBackground(new Color(235, 240, 248));
         routePanel.setBorder(new EmptyBorder(4, 16, 4, 16));
@@ -81,10 +98,11 @@ public class ValidatorView {
         routePanel.add(comboRutas);
         routePanel.add(btnCargarRuta);
 
-        // ── Panel central: tabla de tickets de la ruta ────────────
-        String[] cols = {"ID Ticket", "Pasajero", "Categoría", "Asiento", "Estado"};
+        String[] cols = { "ID Ticket", "Pasajero", "Categoría", "Asiento", "Estado" };
         ticketsModel = new DefaultTableModel(cols, 0) {
-            public boolean isCellEditable(int r, int c) { return false; }
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         ticketsTable = new JTable(ticketsModel);
         ticketsTable.setRowHeight(28);
@@ -102,10 +120,9 @@ public class ValidatorView {
         tablePanel.setBackground(BG);
         tablePanel.setBorder(new EmptyBorder(10, 16, 10, 16));
         tablePanel.add(new JLabel("  Tickets de la ruta seleccionada:",
-            new ImageIcon(), SwingConstants.LEFT), BorderLayout.NORTH);
+                new ImageIcon(), SwingConstants.LEFT), BorderLayout.NORTH);
         tablePanel.add(scroll, BorderLayout.CENTER);
 
-        // ── Panel inferior: validación por ID ─────────────────────
         JPanel validatePanel = new JPanel(new BorderLayout());
         validatePanel.setBackground(new Color(235, 240, 248));
         validatePanel.setBorder(new EmptyBorder(12, 16, 12, 16));
@@ -120,8 +137,8 @@ public class ValidatorView {
         fieldTicketId.setFont(new Font("Arial", Font.PLAIN, 14));
         fieldTicketId.setPreferredSize(new Dimension(140, 34));
         fieldTicketId.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 210, 220)),
-            new EmptyBorder(4, 8, 4, 8)));
+                BorderFactory.createLineBorder(new Color(200, 210, 220)),
+                new EmptyBorder(4, 8, 4, 8)));
 
         btnValidar = new JButton("✔ Validar Ticket");
         btnValidar.setBackground(GREEN);
@@ -142,10 +159,9 @@ public class ValidatorView {
         validatePanel.add(inputRow, BorderLayout.NORTH);
         validatePanel.add(lblResultado, BorderLayout.CENTER);
 
-        // ── Armar frame ───────────────────────────────────────────
         JPanel center = new JPanel(new BorderLayout());
-        center.add(routePanel,   BorderLayout.NORTH);
-        center.add(tablePanel,   BorderLayout.CENTER);
+        center.add(routePanel, BorderLayout.NORTH);
+        center.add(tablePanel, BorderLayout.CENTER);
         center.add(validatePanel, BorderLayout.SOUTH);
 
         frame.add(header, BorderLayout.NORTH);
@@ -153,28 +169,33 @@ public class ValidatorView {
         frame.setVisible(true);
     }
 
-    // ── Métodos para el controller ────────────────────────────────
-
     public void addRouteOption(String id, String label) {
         comboRutas.addItem(id + " | " + label);
     }
 
-    public void clearRoutes() { comboRutas.removeAllItems(); }
+    public void clearRoutes() {
+        comboRutas.removeAllItems();
+    }
 
     public String getSelectedRouteId() {
         Object sel = comboRutas.getSelectedItem();
-        if (sel == null) return null;
+        if (sel == null)
+            return null;
         return sel.toString().split("\\|")[0].trim();
     }
 
     public void addTicketRow(String id, String pasajero,
-                             String categoria, String asiento, String estado) {
-        ticketsModel.addRow(new Object[]{id, pasajero, categoria, asiento, estado});
+            String categoria, String asiento, String estado) {
+        ticketsModel.addRow(new Object[] { id, pasajero, categoria, asiento, estado });
     }
 
-    public void clearTickets() { ticketsModel.setRowCount(0); }
+    public void clearTickets() {
+        ticketsModel.setRowCount(0);
+    }
 
-    public String getTicketId() { return fieldTicketId.getText().trim(); }
+    public String getTicketId() {
+        return fieldTicketId.getText().trim();
+    }
 
     public void showValidResult(boolean valid, String message) {
         SwingUtilities.invokeLater(() -> {
@@ -185,13 +206,12 @@ public class ValidatorView {
 
     public void onLoadRoutes(Runnable handler) {
         btnCargarRuta.addActionListener(e -> handler.run());
-        // Cargar al cambiar la selección también
         comboRutas.addActionListener(e -> handler.run());
     }
 
     public void onValidate(Runnable handler) {
         btnValidar.addActionListener(e -> handler.run());
-        fieldTicketId.addActionListener(e -> handler.run()); // Enter en el campo
+        fieldTicketId.addActionListener(e -> handler.run());
     }
 
     public void onLogout(Runnable handler) {
@@ -202,5 +222,7 @@ public class ValidatorView {
         JOptionPane.showMessageDialog(frame, msg, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    public void close() { frame.dispose(); }
+    public void close() {
+        frame.dispose();
+    }
 }
