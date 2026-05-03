@@ -13,9 +13,11 @@ co\edu\upb\train_management_system\model\route\Route.class
 co\edu\upb\train_management_system\model\user\AbstractUserWithPower.class
 co\edu\upb\train_management_system\view\AdminPanelView$6.class
 co\edu\upb\train_management_system\view\EmployeePanelView$2.class
+co\edu\upb\train_management_system\model\station\StationGraphService.class
 co\edu\upb\train_management_system\model\station\Station.class
 co\edu\upb\train_management_system\view\AdminPanelView$4.class
 co\edu\upb\train_management_system\model\user\Passenger.class
+co\edu\upb\train_management_system\model\station\StationGraphInterface.class
 co\edu\upb\train_management_system\model\train\Train.class
 co\edu\upb\train_management_system\view\EmployeePanelView.class
 co\edu\upb\train_management_system\view\EmployeePanelView$3.class
@@ -25,10 +27,10 @@ co\edu\upb\train_management_system\factory\ServerFactory.class
 co\edu\upb\train_management_system\view\ServerView.class
 co\edu\upb\train_management_system\model\luggage\Luggage.class
 co\edu\upb\train_management_system\view\AdminPanelView$7.class
-co\edu\upb\train_management_system\model\ticket\Customer.class
 co\edu\upb\train_management_system\view\EmployeePanelView$6.class
 co\edu\upb\train_management_system\model\observer\Observer.class
 co\edu\upb\train_management_system\view\RegisterView.class
+co\edu\upb\train_management_system\view\AdminPanelView$8.class
 co\edu\upb\train_management_system\view\EmployeePanelView$4.class
 co\edu\upb\train_management_system\model\history\Action.class
 co\edu\upb\train_management_system\model\wagon\Wagon.class
@@ -44,6 +46,7 @@ co\edu\upb\train_management_system\model\observer\Observable.class
 co\edu\upb\train_management_system\model\ticket\TicketService.class
 co\edu\upb\train_management_system\model\user\Admin.class
 co\edu\upb\train_management_system\view\EmployeePanelView$1.class
+co\edu\upb\train_management_system\view\AdminPanelView$9.class
 co\edu\upb\train_management_system\model\station\StationInterface.class
 co\edu\upb\train_management_system\model\ticket\Ticket.class
 co\edu\upb\train_management_system\model\history\History.class

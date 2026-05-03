@@ -1,6 +1,7 @@
 package co.edu.upb.client.controller;
 
 import co.edu.upb.client.model.ClientModel;
+import co.edu.upb.client.view.BuyTicketView;
 import co.edu.upb.client.view.LoginClientView;
 import co.edu.upb.client.view.PassengerPanelView;
 import co.edu.upb.train_management_system.model.user.Passenger;
@@ -23,6 +24,11 @@ public class PassengerController {
             LoginClientView loginView = new LoginClientView();
             new LoginController(model, loginView);
         });
+
+        view.onBuyTicket(() -> {
+            BuyTicketView buyView = new BuyTicketView();
+            new BuyTicketController(model, buyView, passenger);
+        });
     }
 
     public void reloadRoutes() {
@@ -44,4 +50,6 @@ public class PassengerController {
             ex.printStackTrace();
         }
     }
+
+    
 }

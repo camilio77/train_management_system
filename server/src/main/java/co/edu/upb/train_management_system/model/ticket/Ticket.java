@@ -23,6 +23,7 @@ public class Ticket implements Serializable {
     private boolean status;
     private Date dateOfPurchase;
     private Array<Luggage> luggages;
+    private int numeroAsiento;
 
     public Ticket(int id, Passenger passenger, String category, Wagon wagon, Date dateOfPurchase, int total) {
         this.id = id;
@@ -132,4 +133,7 @@ public class Ticket implements Serializable {
         this.id = id;
         return true;
     }
+
+    public int getNumeroAsiento() { return numeroAsiento; }
+    public boolean setNumeroAsiento(int n) { this.numeroAsiento = n; return true; }
 }

@@ -6,6 +6,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
 import co.edu.upb.train_management_system.model.route.RouteService;
+import co.edu.upb.train_management_system.model.station.StationGraphService;
 import co.edu.upb.train_management_system.model.station.StationService;
 import co.edu.upb.train_management_system.model.ticket.TicketService;
 import co.edu.upb.train_management_system.model.train.TrainService;
@@ -24,6 +25,7 @@ public class ServerModel {
   private final String routeUri;
   private final String wagonUri;
   private final String stationUri;
+  private final String stationGraphUri;
 
   private TicketService ticketService;
   private UserService   userService;
@@ -31,6 +33,7 @@ public class ServerModel {
   private RouteService  routeService;
   private WagonService  wagonService;
   private StationService stationService;
+  private StationGraphService stationGraphService;
 
   private Registry registry;
 
@@ -46,6 +49,7 @@ public class ServerModel {
     this.routeUri  = base + "-routes";
     this.wagonUri  = base + "-wagons";
     this.stationUri  = base + "-stations";
+    this.stationGraphUri = base + "-station-graph";
 
     System.out.println("Base URI: " + base);
   }
@@ -60,7 +64,9 @@ public class ServerModel {
       routeService  = RouteService.getInstance();
       wagonService  = WagonService.getInstance();
       stationService = StationService.getInstance();
+      stationGraphService = StationGraphService.getInstance();
 
+      stationGraphService.loadGraph();
       registry = LocateRegistry.createRegistry(port);
 
       Naming.rebind(ticketUri, ticketService);
@@ -69,6 +75,7 @@ public class ServerModel {
       Naming.rebind(routeUri,  routeService);
       Naming.rebind(wagonUri,  wagonService);
       Naming.rebind(stationUri, stationService);
+      Naming.rebind(stationGraphUri, stationGraphService);
 
       System.out.println("✔ Todos los servicios registrados en el puerto " + port);
       return true;
@@ -87,6 +94,7 @@ public class ServerModel {
       Naming.unbind(routeUri);
       Naming.unbind(wagonUri);
       Naming.unbind(stationUri);
+      Naming.unbind(stationGraphUri);
 
       UnicastRemoteObject.unexportObject(ticketService, true);
       UnicastRemoteObject.unexportObject(userService,   true);
@@ -94,6 +102,7 @@ public class ServerModel {
       UnicastRemoteObject.unexportObject(routeService,  true);
       UnicastRemoteObject.unexportObject(wagonService,  true);
       UnicastRemoteObject.unexportObject(stationService,  true);
+      UnicastRemoteObject.unexportObject(stationGraphService, true);
 
       UnicastRemoteObject.unexportObject(registry, true);
 

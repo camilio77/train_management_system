@@ -205,7 +205,7 @@ public class EmployeePanelView {
                     return;
                 }
 
-                JComboBox<Train> cmbTren = new JComboBox<>(trenes.toArray());
+                JComboBox<Train> cmbTren = new JComboBox<>(trenes.toArray(new Train[0]));
                 cmbTren.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
                     JLabel lbl = new JLabel(value != null ? value.getId() + " — " + value.getName() : "");
                     if (isSelected) {
@@ -215,8 +215,8 @@ public class EmployeePanelView {
                     return lbl;
                 });
 
-                JComboBox<Station> cmbOrigen = new JComboBox<>(estaciones.toArray());
-                JComboBox<Station> cmbDestino = new JComboBox<>(estaciones.toArray());
+                JComboBox<Station> cmbOrigen = new JComboBox<>(estaciones.toArray(new Station[0]));
+                JComboBox<Station> cmbDestino = new JComboBox<>(estaciones.toArray(new Station[0]));
                 cmbDestino.setSelectedIndex(1);
 
                 var stRenderer = new DefaultListCellRenderer() {
@@ -365,7 +365,7 @@ public class EmployeePanelView {
                     return;
                 }
 
-                JComboBox<Train> cmbTren = new JComboBox<>(trenes.toArray());
+                JComboBox<Train> cmbTren = new JComboBox<>(trenes.toArray(new Train[0]));
                 cmbTren.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
                     JLabel lbl = new JLabel(value != null ? value.getId() + " — " + value.getName() : "");
                     if (isSelected) {

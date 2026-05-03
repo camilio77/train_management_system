@@ -21,8 +21,10 @@ public class PassengerPanelView {
 
     private JFrame            frame;
     private DefaultTableModel tableModel;
+    private JTable            table;      // ← campo de clase, no variable local
     private JButton           btnLogout;
     private JButton           btnRefresh;
+    private JButton           btnBuyTicket;
 
     private static final Color DARK_BLUE = new Color(30, 58, 95);
     private static final Color BG        = new Color(245, 247, 250);
@@ -72,7 +74,7 @@ public class PassengerPanelView {
             public boolean isCellEditable(int r, int c) { return false; }
         };
 
-        JTable table = new JTable(tableModel);
+        table = new JTable(tableModel); // ← asigna al campo, no variable local
         table.setRowHeight(30);
         table.setFont(new Font("Arial", Font.PLAIN, 13));
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
@@ -94,7 +96,18 @@ public class PassengerPanelView {
         btnRefresh.setFont(new Font("Arial", Font.BOLD, 12));
         btnRefresh.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnRefresh.setBorder(new EmptyBorder(8, 16, 8, 16));
+
+        btnBuyTicket = new JButton("🎫 Comprar Ticket");
+        btnBuyTicket.setBackground(new Color(34, 139, 80));
+        btnBuyTicket.setForeground(Color.WHITE);
+        btnBuyTicket.setFocusPainted(false);
+        btnBuyTicket.setBorderPainted(false);
+        btnBuyTicket.setFont(new Font("Arial", Font.BOLD, 12));
+        btnBuyTicket.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnBuyTicket.setBorder(new EmptyBorder(8, 16, 8, 16));
+
         buttons.add(btnRefresh);
+        buttons.add(btnBuyTicket);
 
         JPanel center = new JPanel(new BorderLayout());
         center.setBackground(BG);
@@ -114,9 +127,7 @@ public class PassengerPanelView {
         tableModel.addRow(new Object[]{id, tren, origen, destino, salida, llegada});
     }
 
-    public void clearRoutes() {
-        tableModel.setRowCount(0);
-    }
+    public void clearRoutes() { tableModel.setRowCount(0); }
 
     public void onLogout(Runnable handler) {
         btnLogout.addActionListener(e -> handler.run());
@@ -126,9 +137,40 @@ public class PassengerPanelView {
         btnRefresh.addActionListener(e -> handler.run());
     }
 
+    public void onBuyTicket(Runnable handler) {
+        btnBuyTicket.addActionListener(e -> handler.run());
+    }
+
     public void showError(String msg) {
         JOptionPane.showMessageDialog(frame, msg, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     public void close() { frame.dispose(); }
+
+    // ── Getters de la fila seleccionada ──────────────────────────
+
+    public String getSelectedRouteId() {
+        int row = table.getSelectedRow();
+        return row < 0 ? null : tableModel.getValueAt(row, 0).toString();
+    }
+
+    public String getSelectedRouteTrain() {
+        int row = table.getSelectedRow();
+        return row < 0 ? null : tableModel.getValueAt(row, 1).toString();
+    }
+
+    public String getSelectedRouteOrigen() {
+        int row = table.getSelectedRow();
+        return row < 0 ? null : tableModel.getValueAt(row, 2).toString();
+    }
+
+    public String getSelectedRouteDestino() {
+        int row = table.getSelectedRow();
+        return row < 0 ? null : tableModel.getValueAt(row, 3).toString();
+    }
+
+    public String getSelectedRouteSalida() {
+        int row = table.getSelectedRow();
+        return row < 0 ? null : tableModel.getValueAt(row, 4).toString();
+    }
 }
