@@ -349,4 +349,35 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
       throw new RemoteException("Error validando ticket: " + e.getMessage());
     }
   }
+
+  @Override
+  public LinkedList<Ticket> getBoardingOrder(String idRuta) throws RemoteException {
+    try {
+      Connection conn = DatabaseConnection.getConnection();
+
+      // Traemos tickets activos de la ruta, ordenados por prioridad de categoría
+      // y número de asiento dentro de cada categoría
+      PreparedStatement stmt = conn.prepareStatement("""
+            SELECT id_tiquete FROM tiquete
+            WHERE id_ruta = ? AND estado = true
+            ORDER BY
+                CASE categoria
+                    WHEN 'PREMIUM'   THEN 1
+                    WHEN 'EJECUTIVA' THEN 2
+                    ELSE                  3
+                END,
+                numero_asiento ASC
+            """);
+      stmt.setInt(1, Integer.parseInt(idRuta));
+      ResultSet rs = stmt.executeQuery();
+
+      LinkedList<Ticket> list = new LinkedList<>();
+      while (rs.next())
+        list.add(buildTicket(conn, rs.getInt(1)));
+      return list;
+
+    } catch (Exception e) {
+      throw new RemoteException("Error obteniendo orden de abordaje: " + e.getMessage());
+    }
+  }
 }
