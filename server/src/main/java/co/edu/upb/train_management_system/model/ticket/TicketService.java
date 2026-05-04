@@ -263,22 +263,22 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
 
   private Ticket buildTicket(Connection conn, int idTicket) throws SQLException {
     PreparedStatement stmt = conn.prepareStatement("""
-        SELECT t.*, r.fecha_salida, r.fecha_llegada,
-               eo.nombre AS origen_nombre, ed.nombre AS destino_nombre,
+        SELECT t.*,
+               r.fecha_salida,
+               r.fecha_llegada,
+               r.id_ruta,
+               (SELECT e.nombre FROM ruta_estacion re
+                JOIN estacion e ON re.id_estacion = e.id_estacion
+                WHERE re.id_ruta = r.id_ruta
+                ORDER BY re.orden ASC LIMIT 1) AS origen_nombre,
+               (SELECT e.nombre FROM ruta_estacion re
+                JOIN estacion e ON re.id_estacion = e.id_estacion
+                WHERE re.id_ruta = r.id_ruta
+                ORDER BY re.orden DESC LIMIT 1) AS destino_nombre,
                tr.nombre AS tren_nombre
         FROM tiquete t
-        JOIN ruta r ON t.id_ruta = r.id_ruta
-        JOIN tren tr ON r.id_tren = tr.id_tren
-        LEFT JOIN (
-            SELECT re.id_ruta, e.nombre
-            FROM ruta_estacion re JOIN estacion e ON re.id_estacion = e.id_estacion
-            WHERE re.orden = (SELECT MIN(orden) FROM ruta_estacion WHERE id_ruta = re.id_ruta)
-        ) eo ON eo.id_ruta = r.id_ruta
-        LEFT JOIN (
-            SELECT re.id_ruta, e.nombre
-            FROM ruta_estacion re JOIN estacion e ON re.id_estacion = e.id_estacion
-            WHERE re.orden = (SELECT MAX(orden) FROM ruta_estacion WHERE id_ruta = re.id_ruta)
-        ) ed ON ed.id_ruta = r.id_ruta
+        JOIN ruta r     ON t.id_ruta  = r.id_ruta
+        JOIN tren tr    ON r.id_tren  = tr.id_tren
         WHERE t.id_tiquete = ?
         """);
     stmt.setInt(1, idTicket);
@@ -297,14 +297,17 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
     ticket.setStatus(rs.getBoolean("estado"));
     ticket.setNumeroAsiento(rs.getInt("numero_asiento"));
 
+    String origenNombre = rs.getString("origen_nombre");
+    String destinoNombre = rs.getString("destino_nombre");
+
     Route route = new Route(
         String.valueOf(rs.getInt("id_ruta")),
         rs.getTimestamp("fecha_salida"),
         rs.getTimestamp("fecha_llegada"));
     route.setOrigin(new co.edu.upb.train_management_system.model.station.Station(
-        "", rs.getString("origen_nombre") != null ? rs.getString("origen_nombre") : ""));
+        "", origenNombre != null ? origenNombre : "—"));
     route.setDestination(new co.edu.upb.train_management_system.model.station.Station(
-        "", rs.getString("destino_nombre") != null ? rs.getString("destino_nombre") : ""));
+        "", destinoNombre != null ? destinoNombre : "—"));
     ticket.addRoute(route);
 
     PreparedStatement psEq = conn.prepareStatement(
@@ -315,10 +318,9 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
       Luggage luggage = new Luggage(
           String.valueOf(rsEq.getInt("id_equipaje")),
           rsEq.getDouble("peso"));
-      if (rsEq.getObject("id_vagon") != null) {
+      if (rsEq.getObject("id_vagon") != null)
         luggage.setWagon(new LuggageWagon(
             String.valueOf(rsEq.getInt("id_vagon"))));
-      }
       ticket.addLuggage(luggage);
     }
 
@@ -418,45 +420,42 @@ public class TicketService extends UnicastRemoteObject implements TicketInterfac
 
   @Override
   public LinkedList<String> findPathByRoutes(String origen, String destino)
-          throws RemoteException {
+      throws RemoteException {
     try {
-      // Construir un grafo temporal solo con los tramos que tienen rutas registradas
-      co.edu.upb.app.GraphPrototipe.MatrixGraph<String> routeGraph =
-              new co.edu.upb.app.GraphPrototipe.MatrixGraph<>(50);
+      co.edu.upb.app.GraphPrototipe.MatrixGraph<String> routeGraph = new co.edu.upb.app.GraphPrototipe.MatrixGraph<>(
+          50);
 
       Connection conn = DatabaseConnection.getConnection();
 
-      // Agregar todas las estaciones como vértices
       ResultSet rsEst = conn.createStatement()
-              .executeQuery("SELECT nombre FROM estacion ORDER BY id_estacion");
+          .executeQuery("SELECT nombre FROM estacion ORDER BY id_estacion");
       while (rsEst.next())
         routeGraph.nuevoVertice(rsEst.getString("nombre"));
 
-      // Agregar aristas SOLO donde hay rutas registradas
       ResultSet rsRutas = conn.createStatement().executeQuery("""
-            SELECT e1.nombre AS origen, e2.nombre AS destino,
-                   COALESCE(ce.distancia_km, 1) AS km
-            FROM ruta r
-            JOIN ruta_estacion re1 ON re1.id_ruta = r.id_ruta
-            JOIN ruta_estacion re2 ON re2.id_ruta = r.id_ruta
-            JOIN estacion e1 ON e1.id_estacion = re1.id_estacion
-            JOIN estacion e2 ON e2.id_estacion = re2.id_estacion
-            LEFT JOIN conexion_estacion ce
-                ON ce.id_estacion_origen  = re1.id_estacion
-               AND ce.id_estacion_destino = re2.id_estacion
-            WHERE re1.orden < re2.orden
-            GROUP BY e1.nombre, e2.nombre, ce.distancia_km
-            """);
+          SELECT e1.nombre AS origen, e2.nombre AS destino,
+                 COALESCE(ce.distancia_km, 1) AS km
+          FROM ruta r
+          JOIN ruta_estacion re1 ON re1.id_ruta = r.id_ruta
+          JOIN ruta_estacion re2 ON re2.id_ruta = r.id_ruta
+          JOIN estacion e1 ON e1.id_estacion = re1.id_estacion
+          JOIN estacion e2 ON e2.id_estacion = re2.id_estacion
+          LEFT JOIN conexion_estacion ce
+              ON ce.id_estacion_origen  = re1.id_estacion
+             AND ce.id_estacion_destino = re2.id_estacion
+          WHERE re1.orden < re2.orden
+          GROUP BY e1.nombre, e2.nombre, ce.distancia_km
+          """);
       while (rsRutas.next()) {
         try {
           routeGraph.newEdge(
-                  rsRutas.getString("origen"),
-                  rsRutas.getString("destino"),
-                  rsRutas.getInt("km"));
-        } catch (Exception ignored) {}
+              rsRutas.getString("origen"),
+              rsRutas.getString("destino"),
+              rsRutas.getInt("km"));
+        } catch (Exception ignored) {
+        }
       }
 
-      // Dijkstra sobre el grafo de rutas disponibles
       LinkedList<String> path = routeGraph.dijkstra(origen, destino);
       return path;
 
