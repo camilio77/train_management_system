@@ -23,4 +23,6 @@ public interface TicketInterface extends Remote {
     LinkedList<Ticket> buyTicketsAsGuest(String idUsuario, String nombreCompleto,
             String estacionOrigen, String estacionDestino,
             String categoria, double pesoEquipaje) throws RemoteException;
+
+    LinkedList<String> findPathByRoutes(String origen, String destino) throws RemoteException;
 }

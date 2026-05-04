@@ -15,21 +15,22 @@ import co.edu.upb.train_management_system.model.user.Passenger;
 
 public class BuyTicketController {
 
-    private final ClientModel model;
+    private final ClientModel   model;
     private final BuyTicketView view;
-    private final Passenger passenger;
+    private final Passenger     passenger;
 
     public BuyTicketController(ClientModel model, BuyTicketView view, Passenger passenger) {
-        this.model = model;
-        this.view = view;
+        this.model     = model;
+        this.view      = view;
         this.passenger = passenger;
 
         loadStations();
-        view.onBuy(() -> handleBuy());
+        view.onBuy(this::handleBuy);
     }
 
     private void loadStations() {
         try {
+            // 1. Obtener estaciones
             LinkedList<Station> estaciones = model.getStationService().getAll();
             List<String> nombresList = new ArrayList<>();
             estaciones.forEach(s -> {
@@ -37,16 +38,19 @@ public class BuyTicketController {
                 return null;
             });
 
+            // 2. Construir conexiones SOLO desde rutas registradas
+            //    (solo tramos que tienen una ruta con tren asignado)
             LinkedList<Route> rutas = model.getRouteService().getAll();
             List<int[]> connections = new ArrayList<>();
             rutas.forEach(r -> {
                 String oName = r.getOriginName();
                 String dName = r.getDestinationName();
+                if (oName == null || dName == null) return null;
+
                 int idxA = nombresList.indexOf(oName);
                 int idxB = nombresList.indexOf(dName);
-                if (idxA >= 0 && idxB >= 0) {
-                    connections.add(new int[]{idxA, idxB});
-                }
+                if (idxA >= 0 && idxB >= 0)
+                    connections.add(new int[]{idxA, idxB}); // sin km porque no lo tenemos aquí
                 return null;
             });
 
@@ -59,11 +63,11 @@ public class BuyTicketController {
     }
 
     private void handleBuy() {
-        String origen = view.getOrigen();
-        String destino = view.getDestino();
+        String origen    = view.getOrigen();
+        String destino   = view.getDestino();
         String categoria = view.getCategoria();
-        double peso1 = view.getPesoEquipaje1();
-        double peso2 = view.getPesoEquipaje2();
+        double peso1     = view.getPesoEquipaje1();
+        double peso2     = view.getPesoEquipaje2();
 
         if (origen == null || destino == null) {
             view.showError("Selecciona origen y destino en el mapa.");
@@ -79,70 +83,85 @@ public class BuyTicketController {
         }
 
         try {
-            final Route[] rutaEncontrada = {null};
-            model.getRouteService().getAll().forEach(r -> {
-                if (rutaEncontrada[0] == null
-                        && r.getOriginName() != null
-                        && r.getDestinationName() != null
-                        && r.getOriginName().equals(origen)
-                        && r.getDestinationName().equals(destino)) {
-                    rutaEncontrada[0] = r;
-                }
-                return null;
-            });
+            // 1. Calcular camino con Dijkstra ANTES de confirmar
+            LinkedList<String> path = model.getTicketService().findPathByRoutes(origen, destino);
 
-            if (rutaEncontrada[0] == null) {
-                view.showError("No existe una ruta directa entre\n"
-                        + origen + " → " + destino
-                        + "\nVerifica que haya una ruta registrada con ese origen y destino.");
+            if (path == null || path.isEmpty()) {
+                view.showError("No existe camino entre " + origen + " y " + destino +
+                    "\nVerifica que haya conexiones entre estaciones.");
                 return;
             }
 
+            // 2. Mostrar camino en el mapa
             List<String> pathList = new ArrayList<>();
-            pathList.add(origen);
-            pathList.add(destino);
+            path.forEach(s -> { pathList.add(s); return null; });
             view.highlightPath(pathList);
 
-            int confirm = JOptionPane.showConfirmDialog(null,
-                    "Ruta: " + origen + " → " + destino
-                    + "\nTren: " + rutaEncontrada[0].getTrainName()
-                    + "\nCategoría: " + categoria
-                    + (peso1 > 0 ? "\nMaleta 1: " + peso1 + " kg" : "")
-                    + (peso2 > 0 ? "\nMaleta 2: " + peso2 + " kg" : "")
-                    + "\n\n¿Confirmar compra?",
-                    "Confirmar compra", JOptionPane.YES_NO_OPTION);
+            // 3. Calcular distancia total
+            int distanciaKm = model.getStationGraphService()
+                .shortestDistance(origen, destino);
 
-            if (confirm != JOptionPane.YES_OPTION) {
-                return;
+            // 4. Construir resumen del camino para confirmación
+            StringBuilder rutaStr = new StringBuilder();
+            for (int i = 0; i < pathList.size(); i++) {
+                rutaStr.append(pathList.get(i));
+                if (i < pathList.size() - 1) rutaStr.append(" → ");
             }
 
+            int numTramos = pathList.size() - 1;
+            int precioPorTramo = switch (categoria) {
+                case "PREMIUM"   -> 150000;
+                case "EJECUTIVA" -> 80000;
+                default          -> 40000;
+            };
+            int precioTotal = precioPorTramo * numTramos;
+
+            int confirm = JOptionPane.showConfirmDialog(null,
+                "Ruta calculada: " + rutaStr +
+                "\nDistancia total: " + distanciaKm + " km" +
+                "\nNúmero de tramos: " + numTramos +
+                "\nCategoría: " + categoria +
+                "\nPrecio por tramo: $" + String.format("%,d", precioPorTramo).replace(",", ".") +
+                "\nPrecio total: $" + String.format("%,d", precioTotal).replace(",", ".") +
+                (peso1 > 0 ? "\nMaleta 1: " + peso1 + " kg" : "") +
+                (peso2 > 0 ? "\nMaleta 2: " + peso2 + " kg" : "") +
+                "\n\n¿Confirmar compra?",
+                "Confirmar compra", JOptionPane.YES_NO_OPTION);
+
+            if (confirm != JOptionPane.YES_OPTION) return;
+
+            // 5. Comprar tickets (el servidor usa Dijkstra internamente también)
             double pesoTotal = peso1 + peso2;
             LinkedList<Ticket> tickets = model.getTicketService().buyTickets(
-                    passenger.getIdentificacion(),
-                    origen,
-                    destino,
-                    categoria,
-                    pesoTotal
-            );
+                passenger.getIdentificacion(),
+                origen, destino, categoria, pesoTotal);
 
             if (tickets == null || tickets.isEmpty()) {
-                view.showError("No se pudieron generar tickets. Verifica disponibilidad.");
+                view.showError("No se pudieron generar tickets.\n" +
+                    "Verifica que haya rutas registradas para cada tramo del camino.");
                 return;
             }
 
+            // 6. Mostrar resumen de compra
             StringBuilder sb = new StringBuilder();
             sb.append("¡Compra exitosa! ").append(tickets.size()).append(" ticket(s):\n\n");
+            int[] tramo = {1};
             tickets.forEach(t -> {
-                sb.append("Ticket #").append(t.getId())
-                        .append(" | Asiento ").append(t.getNumeroAsiento())
-                        .append(" | $").append(
-                        String.format("%,d", (long) t.getTotal()).replace(",", "."))
-                        .append("\n");
+                String to = t.getRoutes().length > 0 ?
+                    t.getRoutes()[0].getOriginName() : "—";
+                String td = t.getRoutes().length > 0 ?
+                    t.getRoutes()[0].getDestinationName() : "—";
+                sb.append("Tramo ").append(tramo[0]++).append(": ")
+                  .append(to).append(" → ").append(td).append("\n")
+                  .append("  Ticket #").append(t.getId())
+                  .append(" | Asiento ").append(t.getNumeroAsiento())
+                  .append(" | $").append(
+                      String.format("%,d", (long) t.getTotal()).replace(",", "."))
+                  .append("\n\n");
                 return null;
             });
-            if (pesoTotal > 0) {
-                sb.append("\nEquipaje total: ").append(pesoTotal).append(" kg");
-            }
+            if (pesoTotal > 0)
+                sb.append("Equipaje total: ").append(pesoTotal).append(" kg\n");
 
             view.showSuccess(sb.toString());
             view.close();
